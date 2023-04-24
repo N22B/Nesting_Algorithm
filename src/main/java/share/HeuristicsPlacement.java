@@ -456,12 +456,6 @@ public class HeuristicsPlacement{
 			{
 				posicion = (int[])listapuntos.get(j);
 
-
-
-
-
-
-
 				if(j == 0)
 				{
 					pieza.moveToXY(posicion[0], posicion[1], 2);
@@ -469,11 +463,6 @@ public class HeuristicsPlacement{
 				{
 					pieza.moveToXY(posicion[0], posicion[1], 3);
 				}
-
-
-
-
-
 
 				else if(j == 1){
 					pieza.moveToXY(posicion[0], posicion[1], 1);
@@ -3793,12 +3782,17 @@ public class HeuristicsPlacement{
 	private static List<Double> rotacionesAProbar4()
 	{
 		List<Double> listaAngulos = new LinkedList<Double>();
-		listaAngulos.add( (double)0 );
-		listaAngulos.add((double)90);
-		listaAngulos.add((double)180);
-		listaAngulos.add((double)270);
+		for(int i = 0; i <= 359; i += 10){
+			listaAngulos.add((double)i);
+		}
+//		listaAngulos.add( (double)0 );
+//		listaAngulos.add((double)90);
+//		listaAngulos.add((double)180);
+//		listaAngulos.add((double)270);
 		return listaAngulos;
 	}
+
+
 
 
 }

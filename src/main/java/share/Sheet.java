@@ -8,13 +8,13 @@ public class Sheet implements Comparable<Sheet>
 {
 	private int ancho;
 	private int alto;
-	private int numero_Objeto;  // object number
+	private int numero_Objeto;  // åº•æ¿ç¼–å·
 	private int arealibre;      // free area
 	int areaocupada;            // no free area
 	private List<Piece> listaPiezas;
 	private static List<int[]> posiciones;
 	private static List<Double> angulos;
-	private int Nopiezas;  //ÒÑ¾­·ÅÖÃµÄÁã¼ş¸öÊı
+	private int Nopiezas;  //å·²ç»æ”¾ç½®çš„é›¶ä»¶ä¸ªæ•°
 
 
 	public Sheet(int XSize, int YSize, int NoObjeto){			

@@ -18,16 +18,17 @@ import static java.util.concurrent.TimeUnit.*;
 public class Instance
 {
 	private List<Sheet> listaObjetos = new LinkedList<Sheet>(); 
-    List<Piece> listapiezas = new LinkedList<Piece>();      	//Áã¼şÁĞ±í
-    List<Piece> listapiezasFijas = new LinkedList<Piece>(); 	//ÅÅÁĞ
+    List<Piece> listapiezas = new LinkedList<Piece>();      	//é›¶ä»¶åˆ—è¡¨
+    List<Piece> listapiezasFijas = new LinkedList<Piece>(); 	//æ’åˆ—
     private int xObjeto, yObjeto; 							//Object size
-    private int numpiezas;									//Áã¼ş¸öÊı£¬Ñ­»·¶ÁÈ¡ÊµÀıÓÃ
-    private int noPzasAcomodar; 							//Áã¼ş¸öÊı£¬Ã»É¶ÓÃ
-    private int Totalpiezas; 								//Áã¼şµÄ×ÜÃæ»ı£¬Ã»É¶ÓÃ
- 	public ResultVisual[] nuevo; 							//¿ÉÊÓ»¯½á¹û
+    private int numpiezas;									//é›¶ä»¶ä¸ªæ•°ï¼Œå¾ªç¯è¯»å–å®ä¾‹ç”¨
+    private int noPzasAcomodar; 							//é›¶ä»¶ä¸ªæ•°ï¼Œæ²¡å•¥ç”¨
+    private int Totalpiezas; 								//é›¶ä»¶çš„æ€»é¢ç§¯ï¼Œæ²¡å•¥ç”¨
+ 	public ResultVisual[] nuevo; 							//å¯è§†åŒ–ç»“æœ
+	private List<Vector<Sheet>> visualList = new ArrayList<>(); //æ‰€æœ‰å¯è§†åŒ–ç»“æœ
 
 
- 	// ÖØ·ÖÅäÆ÷
+ 	// é‡åˆ†é…å™¨
  	public RePlacement rePlacement = new RePlacement();
  	
 	public Instance(int indi)   
@@ -36,17 +37,17 @@ public class Instance
 	}
 
 	/**
-	 * »ñÈ¡txtÎÊÌâÊµÀı
+	 * è·å–txté—®é¢˜å®ä¾‹
  	 */
 	public void obtainProblem(File file)
 	{
 		RWfiles rw = new RWfiles();
 		int[][] matriz = null;
 		try{  
-			matriz = rw.obtainMatriz(file, 37);  //°ÑÎÄ¼ş·â×°µ½¾ØÕóÀï
+			matriz = rw.obtainMatriz(file, 37);  //æŠŠæ–‡ä»¶å°è£…åˆ°çŸ©é˜µé‡Œ
 		}
 		catch (Exception e){
-			System.err.println("¶ÁÈ¡ÎÄ¼ş´íÎó : "+file);
+			System.err.println("è¯»å–æ–‡ä»¶é”™è¯¯ : "+file);
 		}
 		
 	    Totalpiezas = 0;  
@@ -81,13 +82,13 @@ public class Instance
 		try {
 			Workbook workbook = Workbook.getWorkbook(file);
 			jxl.Sheet sheet = workbook.getSheet(0);
-			numpiezas = sheet.getRows() - 1; //Áã¼ş¸öÊı£¬×îºóÒ»ĞĞÎª³¤¿í
+			numpiezas = sheet.getRows() - 1; //é›¶ä»¶ä¸ªæ•°ï¼Œæœ€åä¸€è¡Œä¸ºé•¿å®½
 			int k = 0;
-			for(int i = 0; i < numpiezas; i = i+2){ //µÚiĞĞ
-				int len = sheet.getRow(i).length;//»ñÈ¡µÚiĞĞµÄcell
+			for(int i = 0; i < numpiezas; i = i+2){ //ç¬¬iè¡Œ
+				int len = sheet.getRow(i).length;//è·å–ç¬¬iè¡Œçš„cell
 
-				// ¶¥µã
-				List<Integer> list = new ArrayList<>(); //±£´æ¶¥µã
+				// é¡¶ç‚¹
+				List<Integer> list = new ArrayList<>(); //ä¿å­˜é¡¶ç‚¹
 				int numofVertices = 0;
 				for(int j = 0; j < len; j++){
 					if(sheet.getCell(j,i).getContents().isEmpty()){
@@ -108,7 +109,7 @@ public class Instance
 					this.listapiezas.add(piece);
 				}
 			}
-			// »ñÈ¡µ×°å³¤¿í
+			// è·å–åº•æ¿é•¿å®½
 			xObjeto = Integer.valueOf(sheet.getCell(0,numpiezas).getContents());
 			yObjeto = Integer.valueOf(sheet.getCell(1,numpiezas).getContents());
 
@@ -127,49 +128,49 @@ public class Instance
 	 */
 	public double execute (int action, int indi, boolean graphVisual){
 		/**
-		 * ÕâÀï¼Ó½û¼ÉËÑË÷¿ò¼Ü£¬ÖĞ¼äÒª·µ»Ø½áºÏ½á¹û£¬¶Ô½á¹û×î²î£¨ÕâÀï½¨Òé¸ÄÎªÂÖÅÌ¶Ä£©µÄ½øĞĞÆÆ»µÖØĞÂ½áºÏ£¬Èç¹û½á¹û¶¼ºÃ£¬±ÈÈçÎª1£¬²»ÆÆ»µ
-		 * Ã¿Ò»ÂÖbanµôºÏ²¢Ğ§¹û×î²îµÄ£¬¿ÉÒÔÊÇ×î³õÁ½Á½ºÏ²¢£¬Ò²¿ÉÒÔÊÇÖĞ¼äµÄºÏ²¢¹ı³Ì£¬Ò²¾ÍÊÇËµ£¬½û¼É±í±£´æµÄÊÇÃ¿Ò»´ÎºÏ²¢µÄ¹ı³Ì
-		 * ÓÃ¸öset¾Í¿ÉÒÔÎ¬»¤ÁË£¬setµÄÔªËØÊÇÅÅĞòÁËµÄºÏ²¢Áã¼şid£¬²¢ÇÒ¼ÓÉÏÒ»Ğ©·Ö¸ô·û£¬»òÕßÊÇÓÃ¸ö¶ÓÁĞ
+		 * è¿™é‡ŒåŠ ç¦å¿Œæœç´¢æ¡†æ¶ï¼Œä¸­é—´è¦è¿”å›ç»“åˆç»“æœï¼Œå¯¹ç»“æœæœ€å·®ï¼ˆè¿™é‡Œå»ºè®®æ”¹ä¸ºè½®ç›˜èµŒï¼‰çš„è¿›è¡Œç ´åé‡æ–°ç»“åˆï¼Œå¦‚æœç»“æœéƒ½å¥½ï¼Œæ¯”å¦‚ä¸º1ï¼Œä¸ç ´å
+		 * æ¯ä¸€è½®banæ‰åˆå¹¶æ•ˆæœæœ€å·®çš„ï¼Œå¯ä»¥æ˜¯æœ€åˆä¸¤ä¸¤åˆå¹¶ï¼Œä¹Ÿå¯ä»¥æ˜¯ä¸­é—´çš„åˆå¹¶è¿‡ç¨‹ï¼Œä¹Ÿå°±æ˜¯è¯´ï¼Œç¦å¿Œè¡¨ä¿å­˜çš„æ˜¯æ¯ä¸€æ¬¡åˆå¹¶çš„è¿‡ç¨‹
+		 * ç”¨ä¸ªsetå°±å¯ä»¥ç»´æŠ¤äº†ï¼Œsetçš„å…ƒç´ æ˜¯æ’åºäº†çš„åˆå¹¶é›¶ä»¶idï¼Œå¹¶ä¸”åŠ ä¸Šä¸€äº›åˆ†éš”ç¬¦ï¼Œæˆ–è€…æ˜¯ç”¨ä¸ªé˜Ÿåˆ—
 		 */
-		// ½û¼ÉÁĞ±íºÍãĞÖµ
-		//Set<String> tabuSet = new HashSet<>(3); 		//±£´æºÏ²¢¹ı³ÌµÄ½û¼É±í£¬ÈİÁ¿Îª3
-		Queue<String> tabuQueue = new LinkedList<>();	//ÓÃ¶ÓÁĞÀ´±£´æ½û¼É±í£¬ÈİÁ¿Îª5
-		double initThreshold = 2; 						//ºÏ²¢ºóÓĞ¸öµÃ·Ö£¬³¬¹ı³õÊ¼¿É½ÓÊÜãĞÖµ¾ÍÄÜºÏ²¢£¬¸Ä³É´«¸øreplacementµÄ³ÉÔ±±äÁ¿ÁË
-		int tabuSize = 3; 								//½û¼ÉÁĞ±í³¤¶È
+		// ç¦å¿Œåˆ—è¡¨å’Œé˜ˆå€¼
+		//Set<String> tabuSet = new HashSet<>(3); 		//ä¿å­˜åˆå¹¶è¿‡ç¨‹çš„ç¦å¿Œè¡¨ï¼Œå®¹é‡ä¸º3
+		Queue<String> tabuQueue = new LinkedList<>();	//ç”¨é˜Ÿåˆ—æ¥ä¿å­˜ç¦å¿Œè¡¨ï¼Œå®¹é‡ä¸º5
+		double initThreshold = 2; 						//åˆå¹¶åæœ‰ä¸ªå¾—åˆ†ï¼Œè¶…è¿‡åˆå§‹å¯æ¥å—é˜ˆå€¼å°±èƒ½åˆå¹¶ï¼Œæ”¹æˆä¼ ç»™replacementçš„æˆå‘˜å˜é‡äº†
+		int tabuSize = 3; 								//ç¦å¿Œåˆ—è¡¨é•¿åº¦
 
-		// Ô­Ê¼µÄÁã¼şÁĞ±í£¬Òª´æ×Å
+		// åŸå§‹çš„é›¶ä»¶åˆ—è¡¨ï¼Œè¦å­˜ç€
 		List<Piece> originPieceList = new ArrayList<>();
-		for (Piece piece : listapiezas) { 				//±£´æ×îÔ­Ê¼µÄÁã¼şÁĞ±í
+		for (Piece piece : listapiezas) { 				//ä¿å­˜æœ€åŸå§‹çš„é›¶ä»¶åˆ—è¡¨
 			originPieceList.add(piece);
 		}
-		// Çø·Ö°¼Í¹¶à±ßĞÎ£¬ÏÈµ÷ÓÃÕâÒ»²½Ğ§¹û¸ü²îÁË£¬²»ÖªÎªÉ¶
+		// åŒºåˆ†å‡¹å‡¸å¤šè¾¹å½¢ï¼Œå…ˆè°ƒç”¨è¿™ä¸€æ­¥æ•ˆæœæ›´å·®äº†ï¼Œä¸çŸ¥ä¸ºå•¥
 		rePlacement.findConvexAndNonconvex(originPieceList, rePlacement.convexList, rePlacement.nonConvexList);
 
 
-		// ½û¼ÉËÑË÷¿ªÊ¼
-		List<Double> resultList = new ArrayList<>(); 	//ÖĞ¼ä½á¹ûÁĞ±í
-		double bestResult = 0; 							//×î¼Ñ½á¹û
-		rePlacement.threshold = 2; 						//×î´óãĞÖµ
-		rePlacement.smallThreshold = 1; 				//×îµÍãĞÖµ£¬½µµ½´Ë¾Í²»»áÔÙ½µÁË
+		// ç¦å¿Œæœç´¢å¼€å§‹
+		List<Double> resultList = new ArrayList<>(); 	//ä¸­é—´ç»“æœåˆ—è¡¨
+		double bestResult = 0; 							//æœ€ä½³ç»“æœ
+		rePlacement.threshold = 2; 						//æœ€å¤§é˜ˆå€¼
+		rePlacement.smallThreshold = 1; 				//æœ€ä½é˜ˆå€¼ï¼Œé™åˆ°æ­¤å°±ä¸ä¼šå†é™äº†
 		rePlacement.tabuQueue = tabuQueue;
-		for(int it = 0; it < 4; it++){
-			// 0. Ô­Ê¼Áã¼ş¸³Öµ
+		for(int it = 0; it < 1; it++){
+			// 0. åŸå§‹é›¶ä»¶èµ‹å€¼
 			rePlacement.setOriginPieceList(originPieceList);
-			// 1. ÉèÖÃfitnessµÄ½ÓÊÜãĞÖµ
-			rePlacement.threshold -= it*0.1; //ãĞÖµÖğ½¥¼õĞ¡£¬Ö±µ½×îµÍ¿É½ÓÊÜãĞÖµn£¿
+			// 1. è®¾ç½®fitnessçš„æ¥å—é˜ˆå€¼
+			rePlacement.threshold -= it*0.1; //é˜ˆå€¼é€æ¸å‡å°ï¼Œç›´åˆ°æœ€ä½å¯æ¥å—é˜ˆå€¼nï¼Ÿ
 			if(rePlacement.threshold < rePlacement.smallThreshold){
-				// ½µµÍºóÊÇ±£³ÖÔÚµÍãĞÖµ»¹ÊÇÖØÀ´£¿
+				// é™ä½åæ˜¯ä¿æŒåœ¨ä½é˜ˆå€¼è¿˜æ˜¯é‡æ¥ï¼Ÿ
 				//rePlacement.threshold = rePlacement.smallThreshold;
 				rePlacement.threshold = initThreshold;
 			}
-			// 2. ½áºÏ£¬ÕâÀï»¹Òª·µ»Ø½áºÏµÄ½á¹û
-			rePlacement.processUion.clear(); //Çå¿ÕÒ»ÏÂºÏ²¢½á¹û
+			// 2. ç»“åˆï¼Œè¿™é‡Œè¿˜è¦è¿”å›ç»“åˆçš„ç»“æœ
+			rePlacement.processUion.clear(); //æ¸…ç©ºä¸€ä¸‹åˆå¹¶ç»“æœ
 			rePlacement.xObject = xObjeto;
 			rePlacement.yObject = yObjeto;
 			listapiezas = rePlacement.combineNonConvex();
 
 
-			// 3.È¡³ö½áºÏµÄ½á¹û£¬°´fitness´Ó´óµ½Ğ¡ÅÅĞò
+			// 3.å–å‡ºç»“åˆçš„ç»“æœï¼ŒæŒ‰fitnessä»å¤§åˆ°å°æ’åº
 			List<Map<String, Double>> processUnion = rePlacement.processUion;
 			Collections.sort(processUnion, new Comparator<Map<String, Double>>() {
 				@Override
@@ -191,38 +192,38 @@ public class Instance
 			});
 
 
-			// 4.¸üĞÂ½û¼É±í£¬ÈıÂÖºó¾Í¸üĞÂÂğ£¬ÒòÎªÈç¹ûÒ»Ö±ÖØ¸´£¬ÄÇqueue¾ÍÒ»Ö±²»¸üĞÂ
+			// 4.æ›´æ–°ç¦å¿Œè¡¨ï¼Œä¸‰è½®åå°±æ›´æ–°å—ï¼Œå› ä¸ºå¦‚æœä¸€ç›´é‡å¤ï¼Œé‚£queueå°±ä¸€ç›´ä¸æ›´æ–°
 			if(it % tabuSize == 0){
-				tabuQueue.poll(); //µ¯³ö±£´æ×î¾ÃµÄ
+				tabuQueue.poll(); //å¼¹å‡ºä¿å­˜æœ€ä¹…çš„
 			}
-			// Ê×ÏÈÈ·±£ºÏ²¢±í²»ÊÇ¿ÕµÄ£¬todo:Èç¹ûÊÇ¿ÕµÄ¾ÍÖ±½ÓÌ×ÁÏ?
+			// é¦–å…ˆç¡®ä¿åˆå¹¶è¡¨ä¸æ˜¯ç©ºçš„ï¼Œtodo:å¦‚æœæ˜¯ç©ºçš„å°±ç›´æ¥å¥—æ–™?
 			if(!processUnion.isEmpty()){
-				// »ñµÃfitness×îĞ¡µÄÄÇ¸ö£¬¼ÓÈë½û¼É±í
+				// è·å¾—fitnessæœ€å°çš„é‚£ä¸ªï¼ŒåŠ å…¥ç¦å¿Œè¡¨
 				String fit = (String) processUnion.get(0).keySet().stream().toArray()[0];
-				// Èç¹û½û¼É±íµÄ³¤¶ÈĞ¡ÓÚ3£¬ÇÒ²»°üº¬¼´½«¼ÓÈëµÄÔªËØ£¬²Å¼ÓÈë
-				if(queueContains(tabuQueue, fit)){ //Èç¹û´æÔÚ£¬ÔòËæ»úÑ¡Ò»¸ö¼ÓÈë
-					// Ëæ»úÑ¡Ò»¸öºÏ²¢¹ı³ÌÖĞµÄ½á¹û¼ÓÈë
+				// å¦‚æœç¦å¿Œè¡¨çš„é•¿åº¦å°äº3ï¼Œä¸”ä¸åŒ…å«å³å°†åŠ å…¥çš„å…ƒç´ ï¼Œæ‰åŠ å…¥
+				if(queueContains(tabuQueue, fit)){ //å¦‚æœå­˜åœ¨ï¼Œåˆ™éšæœºé€‰ä¸€ä¸ªåŠ å…¥
+					// éšæœºé€‰ä¸€ä¸ªåˆå¹¶è¿‡ç¨‹ä¸­çš„ç»“æœåŠ å…¥
 					int size = processUnion.size();
 					int randomNum = (int) (Math.random() * size);
 					fit = (String) processUnion.get(randomNum).keySet().stream().toArray()[0];
-					while (tabuQueue.contains(fit)){ //Èç¹û»¹ÖØ¸´ÁË£¬ÔÙÉú³É
+					while (tabuQueue.contains(fit)){ //å¦‚æœè¿˜é‡å¤äº†ï¼Œå†ç”Ÿæˆ
 						randomNum = (int) (Math.random() * size);
 						fit = (String) processUnion.get(randomNum).keySet().stream().toArray()[0];
 					}
 					tabuQueue.offer(fit);
 				}else{
-					tabuQueue.offer(fit); //²»´æÔÚ²Å¼ÓÈë
+					tabuQueue.offer(fit); //ä¸å­˜åœ¨æ‰åŠ å…¥
 				}
 			}
 			
 
-			// 5.¿ªÊ¼Ì×ÁÏ
-			// ×¼±¸ºÃÁã¼şºÍµ×°å
+			// 5.å¼€å§‹å¥—æ–™
+			// å‡†å¤‡å¥½é›¶ä»¶å’Œåº•æ¿
 			if(listaObjetos.size()>0)
 				listaObjetos.clear(); 
 			listaObjetos.add(new Sheet(xObjeto, yObjeto, 0));
 
-			double currentResult; //µ±Ç°½á¹û
+			double currentResult; //å½“å‰ç»“æœ
 			ControlHeuristics control = new ControlHeuristics();
 			do
 			{
@@ -230,7 +231,7 @@ public class Instance
 			}while(listapiezas.size()>0);
 
 
-			// 6.¼ÆËã½á¹û£¬Çå³ıÃ»ÓĞÁã¼şµÄµ×°å
+			// 6.è®¡ç®—ç»“æœï¼Œæ¸…é™¤æ²¡æœ‰é›¶ä»¶çš„åº•æ¿
 			for(int i=0; i<listaObjetos.size(); i++)
 			{
 				Sheet objk = (Sheet)listaObjetos.get(i);
@@ -238,40 +239,40 @@ public class Instance
 				if(Lista2.size()==0)
 					listaObjetos.remove(i);
 			}
-			// ¼ÆËã½á¹û
+			// è®¡ç®—ç»“æœ
 			currentResult=control.calcularAptitud(listaObjetos);
 			int ax=(int) (currentResult*1000.0);
 			currentResult=(double) ax/1000.0;
 			resultList.add(currentResult);
-			// ¸üĞÂ×î¼Ñ½á¹û
+			// æ›´æ–°æœ€ä½³ç»“æœ
 			if(currentResult > bestResult){
 				bestResult = currentResult;
 			}
 
 
-			// 7.»¹Ô­½á¹û£¨ºó¼ÓµÄ£©
+			// 7.è¿˜åŸç»“æœï¼ˆååŠ çš„ï¼‰
 			for(int i = 0; i < listaObjetos.size(); i++){
-				// ¶ÔÃ¿¸öµ×°åÉÏµÄÁã¼ş
+				// å¯¹æ¯ä¸ªåº•æ¿ä¸Šçš„é›¶ä»¶
 				Sheet sheet = listaObjetos.get(i);
 				List<Piece> pieceList = sheet.getPzasInside();
 
 				boolean flag = true;
 				while(flag){
-					boolean happen = false; //·¢ÉúÁËÉ¾³ı
+					boolean happen = false; //å‘ç”Ÿäº†åˆ é™¤
 					for(int j = 0; j < pieceList.size(); j++){
 						Piece piece = pieceList.get(j);
 						if(piece.child.size() > 0) {
 							double rotate = piece.getRotada();
-							piece.rotateCori(rotate); //Ğı×ªÔ­×ø±ê£¬ÔÙ¼ÆËãÒÆ¶¯ÁË¶àÉÙ
-							int shifx = piece.coordX[0] - piece.getCoriX()[0]; //x×ø±êµÄÒÆ¶¯³¤¶È
-							int shify = piece.coordY[0] - piece.getCoriY()[0]; //y×ø±êµÄÒÆ¶¯³¤¶È
-							movereStore(piece, rotate, shifx, shify, pieceList); //½«º¢×Ó½Úµã¶¼¼ÓÈëµ±Ç°µ×°åµÄÁã¼şÁĞ±í
-							pieceList.remove(piece); //É¾µôÕâ¸ö¸¸½Úµã
+							piece.rotateCori(rotate); //æ—‹è½¬åŸåæ ‡ï¼Œå†è®¡ç®—ç§»åŠ¨äº†å¤šå°‘
+							int shifx = piece.coordX[0] - piece.getCoriX()[0]; //xåæ ‡çš„ç§»åŠ¨é•¿åº¦
+							int shify = piece.coordY[0] - piece.getCoriY()[0]; //yåæ ‡çš„ç§»åŠ¨é•¿åº¦
+							movereStore(piece, rotate, shifx, shify, pieceList); //å°†å­©å­èŠ‚ç‚¹éƒ½åŠ å…¥å½“å‰åº•æ¿çš„é›¶ä»¶åˆ—è¡¨
+							pieceList.remove(piece); //åˆ æ‰è¿™ä¸ªçˆ¶èŠ‚ç‚¹
 							happen = true;
-							break; //Ö»ÓĞ»¹ÓĞº¢×Ó½ÚµãµÄÁã¼ş¾Í»áÒ»Ö±ÖØ¸´
+							break; //åªæœ‰è¿˜æœ‰å­©å­èŠ‚ç‚¹çš„é›¶ä»¶å°±ä¼šä¸€ç›´é‡å¤
 						}
 					}
-					if(happen){ //ÓĞÉ¾³ı£¬»¹µÃ¼ÌĞøÑ­»·
+					if(happen){ //æœ‰åˆ é™¤ï¼Œè¿˜å¾—ç»§ç»­å¾ªç¯
 						flag = true;
 					}else{
 						flag = false;
@@ -280,28 +281,40 @@ public class Instance
 			}
 
 
-			// 8.¿ÉÊÓ»¯½á¹û
+			// 8.ä¸­é—´ç»“æœå¯è§†åŒ–
+			Vector<Sheet> listita = new Vector<Sheet>();
+			for(int i=0; i<listaObjetos.size(); i++)
+			{
+				listita.add((Sheet)(listaObjetos.get(i)));
+			}
 			if (graphVisual){
-				Vector<Sheet> listita = new Vector<Sheet>();
-				for(int i=0; i<listaObjetos.size(); i++)
-				{
-					listita.add((Sheet)(listaObjetos.get(i)));
-				}
 				nuevo[indi] = new ResultVisual(listita);
 				nuevo[indi].setSize(700, 650);
 				nuevo[indi].setVisible(true);
 			}
+			visualList.add(listita);
 
 		}
 
-		// ÔÙÅÜÒ»±é²»½áºÏµÄ
+		// 9.å†è·‘ä¸€éä¸ç»“åˆçš„
 		bestResult = getBestResult(indi, graphVisual, originPieceList, resultList, bestResult);
 
-		System.out.println("process£º"+resultList);
-		System.out.println("best result£º"+bestResult);
+		System.out.println("processï¼š"+resultList);
+		System.out.println("best resultï¼š"+bestResult);
+
+		// 10.å¯è§†åŒ–é‡æ„
+		for(int i = 0; i < resultList.size(); i++){
+			// ç”»å‡ºæœ€å¥½çš„ç»“æœ
+			if(resultList.get(i) == bestResult){
+				nuevo[indi] = new ResultVisual(visualList.get(i));
+				nuevo[indi].setSize(700, 650);
+				nuevo[indi].setVisible(true);
+				break; //è¾“å‡ºä¸€ä¸ªå°±è¡Œ
+			}
+		}
 
 		/**
-		 * 1.½áºÏ£¬Ô­Ê¼°æ
+		 * 1.ç»“åˆï¼ŒåŸå§‹ç‰ˆ
 		 */
 //		if(listaObjetos.size()>0)
 //			listaObjetos.clear(); //Limpiar el contenedor
@@ -316,52 +329,52 @@ public class Instance
 //		}while(listapiezas.size()>0);
 
 
-		// ½«¶ÔÓ¦µÄÁã¼şÓ³Éä»ØÈ¥
+		// å°†å¯¹åº”çš„é›¶ä»¶æ˜ å°„å›å»
 
 		/**
-		 * 0.³õÊ¼»¯repalcement
+		 * 0.åˆå§‹åŒ–repalcement
 		 */
 //		rePlacement.setObjectList(listaObjetos);
 //		rePlacement.setOriginPieceList(listapiezas);
 
 		/**
-		 * 2.¼Óreplacement
+		 * 2.åŠ replacement
 		 */
 //		rePlacement.fillSingleHole(listaObjetos);
 //		rePlacement.fillSingleHole(listaObjetos);
 
 
 		/**
-		 * 3.³¢ÊÔ»»³öÒ»¸öÔÙ»»Èë1or2or3¸ö
+		 * 3.å°è¯•æ¢å‡ºä¸€ä¸ªå†æ¢å…¥1or2or3ä¸ª
 		 */
 //		rePlacement.changeOne();
 //		rePlacement.changeOne();
 
 		/**
-		 * 4.³¢ÊÔ»»³öÁ½¸öÔÙ»»Èë1or2or3¸ö
+		 * 4.å°è¯•æ¢å‡ºä¸¤ä¸ªå†æ¢å…¥1or2or3ä¸ª
 		 */
 //		rePlacement.changeTwo();
 
 		/**
-		 * 3.ÊÔÊÔ´ÓÓÒÍù×ó·Å,
-		 * actionÎª0£¬±íÊ¾´ÓÓÒÉÏµ½×óÏÂ
-		 * actionÎª1£¬±íÊ¾´Ó×óÉÏµ½ÓÒÏÂ
+		 * 3.è¯•è¯•ä»å³å¾€å·¦æ”¾,
+		 * actionä¸º0ï¼Œè¡¨ç¤ºä»å³ä¸Šåˆ°å·¦ä¸‹
+		 * actionä¸º1ï¼Œè¡¨ç¤ºä»å·¦ä¸Šåˆ°å³ä¸‹
 		 */
 //		reExecute(listapiezas, listaObjetos, 1);
 
 
 		/**
-		 * ÔÙÌî¶´
+		 * å†å¡«æ´
 		 */
 //		rePlacement.fillSingleHole(listaObjetos);
 
 		/**
-		 * ÔÙ½»»»
+		 * å†äº¤æ¢
 		 */
 //		rePlacement.changeOne();
 
 		/**
-		 * ÔÙÖØÅÅÑù
+		 * å†é‡æ’æ ·
 		 */
 //		reExecute(listapiezas, listaObjetos, 1);
 //		rePlacement.fillSingleHole(listaObjetos);
@@ -371,82 +384,82 @@ public class Instance
 
 
 		/**
-		 * ×ÜÁ÷³Ì1
+		 * æ€»æµç¨‹1
 		 */
 		int iter = 1;
-		for(int i = 0; i < iter; i++){ //ÒÔÏÂËùÓĞ²Ù×÷¾ùÖ»Õë¶ÔÀûÓÃÂÊ²»Îª1µÄµ×°å
-			// 1.ÓÃÒ»¸öÁã¼şÌîµ¥¸ö¶´£¬½ÓÊÜ´Ó¸ßÀûÓÃÂÊ»»µ½µÍÀûÓÃÂÊ£¬ÌîÍêºóÒª¼ÇµÃÖØĞÂÅÅĞòÀûÓÃÂÊ
+		for(int i = 0; i < iter; i++){ //ä»¥ä¸‹æ‰€æœ‰æ“ä½œå‡åªé’ˆå¯¹åˆ©ç”¨ç‡ä¸ä¸º1çš„åº•æ¿
+			// 1.ç”¨ä¸€ä¸ªé›¶ä»¶å¡«å•ä¸ªæ´ï¼Œæ¥å—ä»é«˜åˆ©ç”¨ç‡æ¢åˆ°ä½åˆ©ç”¨ç‡ï¼Œå¡«å®Œåè¦è®°å¾—é‡æ–°æ’åºåˆ©ç”¨ç‡
 
-			// 2.ÓÃÁ½¸öÁã¼şÌîµ¥¸ö¶´£¬Ö»Õë¶ÔÀûÓÃÂÊ×î¸ßµÄµ×°å£¬Ö»¿¼ÂÇÌîÂú
+			// 2.ç”¨ä¸¤ä¸ªé›¶ä»¶å¡«å•ä¸ªæ´ï¼Œåªé’ˆå¯¹åˆ©ç”¨ç‡æœ€é«˜çš„åº•æ¿ï¼Œåªè€ƒè™‘å¡«æ»¡
 
-			// 3.ÓÃÈı¸öÁã¼şÌîµ¥¸ö¶´£¬Ö»Õë¶ÔÀûÓÃÂÊ×î¸ßµÄµ×°å£¬Ö»¿¼ÂÇÌîÂú
+			// 3.ç”¨ä¸‰ä¸ªé›¶ä»¶å¡«å•ä¸ªæ´ï¼Œåªé’ˆå¯¹åˆ©ç”¨ç‡æœ€é«˜çš„åº•æ¿ï¼Œåªè€ƒè™‘å¡«æ»¡
 
-			// 4.´Ó×î¸ßÀûÓÃÂÊÖĞ½»»»³öÒ»¸ö£¬½»»»½øÒ»¸öorÁ½¸öorÈı¸öorËÄ¸ö£¬²¢ÇÒÖ»¿¼ÂÇÌîÂú
-			// Èç¹û³É¹¦»»½øÈı¸ö£¬¶Ô×î¸ßÀûÓÃÂÊÖ®ÍâµÄµ×°åÖØÅÅÑù£¨ËÄ¸ö·½Ïò£©£¬½á¹û¸üºÃÔò±£´æ
-			// ×¢ÒâÕâÀïÔ­±¾ÀûÓÃÂÊ×î¸ßµÄµ×°å¿ÉÄÜ²»ÔÙÊÇ×î¸ßÁË£¬ÒòÎªËû¿ÉÒÔ´Ó×ÔÉíÄÃµ½ºÏÊÊµÄÌî³äµ½ÆäËûÎ»ÖÃ£¬µ«ÊÇÓ¦¸ÃÒ²¿ÉÒÔ£¬Ö»²»¹ıËû¿ÉÄÜ»áÓĞ¿ÕÎ»
-			// ËùÒÔÕâÀï¿ÉÒÔ¼Ó¸öÅĞ¶Ï£¬Èç¹ûÔ­±¾ÀûÓÃÂÊ×î¸ßµÄµ×°åÀûÓÃÂÊ±äµÍÁË£¬ÄÇÃ´¿¼ÂÇ¸øËû·ÅÈëÒ»Ğ©Áã¼ş
+			// 4.ä»æœ€é«˜åˆ©ç”¨ç‡ä¸­äº¤æ¢å‡ºä¸€ä¸ªï¼Œäº¤æ¢è¿›ä¸€ä¸ªorä¸¤ä¸ªorä¸‰ä¸ªorå››ä¸ªï¼Œå¹¶ä¸”åªè€ƒè™‘å¡«æ»¡
+			// å¦‚æœæˆåŠŸæ¢è¿›ä¸‰ä¸ªï¼Œå¯¹æœ€é«˜åˆ©ç”¨ç‡ä¹‹å¤–çš„åº•æ¿é‡æ’æ ·ï¼ˆå››ä¸ªæ–¹å‘ï¼‰ï¼Œç»“æœæ›´å¥½åˆ™ä¿å­˜
+			// æ³¨æ„è¿™é‡ŒåŸæœ¬åˆ©ç”¨ç‡æœ€é«˜çš„åº•æ¿å¯èƒ½ä¸å†æ˜¯æœ€é«˜äº†ï¼Œå› ä¸ºä»–å¯ä»¥ä»è‡ªèº«æ‹¿åˆ°åˆé€‚çš„å¡«å……åˆ°å…¶ä»–ä½ç½®ï¼Œä½†æ˜¯åº”è¯¥ä¹Ÿå¯ä»¥ï¼Œåªä¸è¿‡ä»–å¯èƒ½ä¼šæœ‰ç©ºä½
+			// æ‰€ä»¥è¿™é‡Œå¯ä»¥åŠ ä¸ªåˆ¤æ–­ï¼Œå¦‚æœåŸæœ¬åˆ©ç”¨ç‡æœ€é«˜çš„åº•æ¿åˆ©ç”¨ç‡å˜ä½äº†ï¼Œé‚£ä¹ˆè€ƒè™‘ç»™ä»–æ”¾å…¥ä¸€äº›é›¶ä»¶
 
-			// 5.´Ó×î¸ßÀûÓÃÂÊÖĞ½»»»³öÁ½¸ö£¬½»»»½øÁ½¸öorÈı¸öorËÄ¸ö£¬²¢ÇÒÖ»¿¼ÂÇÌîÂú£¨ÕâÀïÈç¹ûÄÜµ½5¸ö6¸öÊÇÓĞ¿ÉÄÜÓĞ¸üºÃµÄ½á¹ûµÄ£¬ÈçTS018C8µÄ×î¸ßµ×°å£©
-			// Èç¹û³É¹¦£¬¶Ô×î¸ßÀûÓÃÂÊÖ®ÍâµÄµ×°åÖØÅÅÑù£¨ËÄ¸ö·½Ïò£©£¬½á¹û¸üºÃÔò±£´æ
+			// 5.ä»æœ€é«˜åˆ©ç”¨ç‡ä¸­äº¤æ¢å‡ºä¸¤ä¸ªï¼Œäº¤æ¢è¿›ä¸¤ä¸ªorä¸‰ä¸ªorå››ä¸ªï¼Œå¹¶ä¸”åªè€ƒè™‘å¡«æ»¡ï¼ˆè¿™é‡Œå¦‚æœèƒ½åˆ°5ä¸ª6ä¸ªæ˜¯æœ‰å¯èƒ½æœ‰æ›´å¥½çš„ç»“æœçš„ï¼Œå¦‚TS018C8çš„æœ€é«˜åº•æ¿ï¼‰
+			// å¦‚æœæˆåŠŸï¼Œå¯¹æœ€é«˜åˆ©ç”¨ç‡ä¹‹å¤–çš„åº•æ¿é‡æ’æ ·ï¼ˆå››ä¸ªæ–¹å‘ï¼‰ï¼Œç»“æœæ›´å¥½åˆ™ä¿å­˜
 
-			// 6.µ¥¸öµ¥¸ö½»»»£¬½ÓÊÜ²»ÌîÂú£¬µ«ÓĞÌá¸ßµÄ½â£¬¹æÔòÎª£º½»»»£¬È»ºóÖØÅÅÑù£¬Èç¹û·ÅµÃ½øÈ¥£¬½ÓÊÜ£¬Èç¹û·Å²»½øÈ¥£¬²»½ÓÊÜ
+			// 6.å•ä¸ªå•ä¸ªäº¤æ¢ï¼Œæ¥å—ä¸å¡«æ»¡ï¼Œä½†æœ‰æé«˜çš„è§£ï¼Œè§„åˆ™ä¸ºï¼šäº¤æ¢ï¼Œç„¶åé‡æ’æ ·ï¼Œå¦‚æœæ”¾å¾—è¿›å»ï¼Œæ¥å—ï¼Œå¦‚æœæ”¾ä¸è¿›å»ï¼Œä¸æ¥å—
 
 		}
 
 		/**
-		 * ×ÜÁ÷³Ì2
+		 * æ€»æµç¨‹2
 		 */
 		int iter2 = 1;
-		for(int i = 0; i < iter2; i++){ //ÒÔÏÂËùÓĞ²Ù×÷¾ùÖ»Õë¶ÔÀûÓÃÂÊ²»Îª1µÄµ×°å
-			// 1.ÓÃÒ»¸öÁã¼şÌîµ¥¸ö¶´£¬½ÓÊÜ´Ó¸ßÀûÓÃÂÊ»»µ½µÍÀûÓÃÂÊ£¬ÌîÍêºóÒª¼ÇµÃÖØĞÂÅÅĞòÀûÓÃÂÊ
-			// Ìî³äµ½²»ÔÙÌáÉıÎªÖ¹
+		for(int i = 0; i < iter2; i++){ //ä»¥ä¸‹æ‰€æœ‰æ“ä½œå‡åªé’ˆå¯¹åˆ©ç”¨ç‡ä¸ä¸º1çš„åº•æ¿
+			// 1.ç”¨ä¸€ä¸ªé›¶ä»¶å¡«å•ä¸ªæ´ï¼Œæ¥å—ä»é«˜åˆ©ç”¨ç‡æ¢åˆ°ä½åˆ©ç”¨ç‡ï¼Œå¡«å®Œåè¦è®°å¾—é‡æ–°æ’åºåˆ©ç”¨ç‡
+			// å¡«å……åˆ°ä¸å†æå‡ä¸ºæ­¢
 
-			// 2.ÓÃÁ½¸öÁã¼şÌîµ¥¸ö¶´£¬Ö»Õë¶ÔÀûÓÃÂÊ×î¸ßµÄµ×°å£¬Ö»¿¼ÂÇÌîÂú
+			// 2.ç”¨ä¸¤ä¸ªé›¶ä»¶å¡«å•ä¸ªæ´ï¼Œåªé’ˆå¯¹åˆ©ç”¨ç‡æœ€é«˜çš„åº•æ¿ï¼Œåªè€ƒè™‘å¡«æ»¡
 
-			// 3.ÓÃÈı¸öÁã¼şÌîµ¥¸ö¶´£¬Ö»Õë¶ÔÀûÓÃÂÊ×î¸ßµÄµ×°å£¬Ö»¿¼ÂÇÌîÂú
+			// 3.ç”¨ä¸‰ä¸ªé›¶ä»¶å¡«å•ä¸ªæ´ï¼Œåªé’ˆå¯¹åˆ©ç”¨ç‡æœ€é«˜çš„åº•æ¿ï¼Œåªè€ƒè™‘å¡«æ»¡
 
-			// 4.´Ó×î¸ßÀûÓÃÂÊÖĞ½»»»³öÒ»¸ö£¬½»»»½øÒ»¸öorÁ½¸öorÈı¸öorËÄ¸ö£¬²¢ÇÒÖ»¿¼ÂÇÌîÂú
-			// Ò»Ö±½»»»£¬ÖªµÀÀûÓÃÂÊ×î¸ßµÄµ×°åµÄÀûÓÃÂÊ²»ÔÙÌá¸ß
-			// Èç¹ûÓĞ·¢Éú³É¹¦»»½øÈı¸ö£¬¶Ô×î¸ßÀûÓÃÂÊÖ®ÍâµÄµ×°åÖØÅÅÑù£¨ËÄ¸ö·½Ïò£©£¬½á¹û¸üºÃÔò±£´æ
-			// ×¢ÒâÕâÀïÔ­±¾ÀûÓÃÂÊ×î¸ßµÄµ×°å¿ÉÄÜ²»ÔÙÊÇ×î¸ßÁË£¬ÒòÎªËû¿ÉÒÔ´Ó×ÔÉíÄÃµ½ºÏÊÊµÄÌî³äµ½ÆäËûÎ»ÖÃ£¬µ«ÊÇÓ¦¸ÃÒ²¿ÉÒÔ£¬Ö»²»¹ıËû¿ÉÄÜ»áÓĞ¿ÕÎ»
-			// ËùÒÔÕâÀï¿ÉÒÔ¼Ó¸öÅĞ¶Ï£¬Èç¹ûÔ­±¾ÀûÓÃÂÊ×î¸ßµÄµ×°åÀûÓÃÂÊ±äµÍÁË£¬ÄÇÃ´¿¼ÂÇ¸øËû·ÅÈëÒ»Ğ©Áã¼ş
-			// ½»»»µ½²»ÔÙÌáÉıÎªÖ¹
+			// 4.ä»æœ€é«˜åˆ©ç”¨ç‡ä¸­äº¤æ¢å‡ºä¸€ä¸ªï¼Œäº¤æ¢è¿›ä¸€ä¸ªorä¸¤ä¸ªorä¸‰ä¸ªorå››ä¸ªï¼Œå¹¶ä¸”åªè€ƒè™‘å¡«æ»¡
+			// ä¸€ç›´äº¤æ¢ï¼ŒçŸ¥é“åˆ©ç”¨ç‡æœ€é«˜çš„åº•æ¿çš„åˆ©ç”¨ç‡ä¸å†æé«˜
+			// å¦‚æœæœ‰å‘ç”ŸæˆåŠŸæ¢è¿›ä¸‰ä¸ªï¼Œå¯¹æœ€é«˜åˆ©ç”¨ç‡ä¹‹å¤–çš„åº•æ¿é‡æ’æ ·ï¼ˆå››ä¸ªæ–¹å‘ï¼‰ï¼Œç»“æœæ›´å¥½åˆ™ä¿å­˜
+			// æ³¨æ„è¿™é‡ŒåŸæœ¬åˆ©ç”¨ç‡æœ€é«˜çš„åº•æ¿å¯èƒ½ä¸å†æ˜¯æœ€é«˜äº†ï¼Œå› ä¸ºä»–å¯ä»¥ä»è‡ªèº«æ‹¿åˆ°åˆé€‚çš„å¡«å……åˆ°å…¶ä»–ä½ç½®ï¼Œä½†æ˜¯åº”è¯¥ä¹Ÿå¯ä»¥ï¼Œåªä¸è¿‡ä»–å¯èƒ½ä¼šæœ‰ç©ºä½
+			// æ‰€ä»¥è¿™é‡Œå¯ä»¥åŠ ä¸ªåˆ¤æ–­ï¼Œå¦‚æœåŸæœ¬åˆ©ç”¨ç‡æœ€é«˜çš„åº•æ¿åˆ©ç”¨ç‡å˜ä½äº†ï¼Œé‚£ä¹ˆè€ƒè™‘ç»™ä»–æ”¾å…¥ä¸€äº›é›¶ä»¶
+			// äº¤æ¢åˆ°ä¸å†æå‡ä¸ºæ­¢
 
 
-			// 6.³¢ÊÔ°Ñ×îµÍÀûÓÃÂÊµÄÁã¼şÍù¸ßÀûÓÃÂÊµÄ·Å£¬·Å²»½ø¾ÍÖØÅÅÑù
+			// 6.å°è¯•æŠŠæœ€ä½åˆ©ç”¨ç‡çš„é›¶ä»¶å¾€é«˜åˆ©ç”¨ç‡çš„æ”¾ï¼Œæ”¾ä¸è¿›å°±é‡æ’æ ·
 
-			// 6.µ¥¸öµ¥¸ö½»»»£¬½ÓÊÜ²»ÌîÂú£¬µ«ÓĞÌá¸ßµÄ½â£¬¹æÔòÎª£º½»»»£¬È»ºóÖØÅÅÑù£¬Èç¹û·ÅµÃ½øÈ¥£¬½ÓÊÜ£¬Èç¹û·Å²»½øÈ¥£¬²»½ÓÊÜ
+			// 6.å•ä¸ªå•ä¸ªäº¤æ¢ï¼Œæ¥å—ä¸å¡«æ»¡ï¼Œä½†æœ‰æé«˜çš„è§£ï¼Œè§„åˆ™ä¸ºï¼šäº¤æ¢ï¼Œç„¶åé‡æ’æ ·ï¼Œå¦‚æœæ”¾å¾—è¿›å»ï¼Œæ¥å—ï¼Œå¦‚æœæ”¾ä¸è¿›å»ï¼Œä¸æ¥å—
 
 		}
 
-		// ×îºóÅĞ¶Ï£¬Èç¹ûÃ»ÓĞ¸Ä½ø£¬Ê¹ÓÃÔ­À´µÄ½â
+		// æœ€ååˆ¤æ–­ï¼Œå¦‚æœæ²¡æœ‰æ”¹è¿›ï¼Œä½¿ç”¨åŸæ¥çš„è§£
 
 
-		// Õâ¶ÎÊÇÔ­Ê¼µÄ£¬Ö±½Ó½â¿ª¾ÍĞĞ,START
+		// è¿™æ®µæ˜¯åŸå§‹çš„ï¼Œç›´æ¥è§£å¼€å°±è¡Œ,START
 		// delete the bin that cannot pack any item ?????item?bin
 		// bestResult = getBestResult(indi, graphVisual, originPieceList, resultList, bestResult);
-		// Õâ¶ÎÊÇÔ­Ê¼µÄ£¬Ö±½Ó½â¿ª¾ÍĞĞ£¬END
+		// è¿™æ®µæ˜¯åŸå§‹çš„ï¼Œç›´æ¥è§£å¼€å°±è¡Œï¼ŒEND
 
 		return bestResult;
 	}
 
 
 	/**
-	 * @param action ²¢ĞĞ°æ±¾
+	 * @param action å¹¶è¡Œç‰ˆæœ¬
 	 * @param indi
 	 * @param graphVisual
 	 * @return
 	 */
 	public double executeParallel(int action, int indi, boolean graphVisual){
-		// ¿ª¸öÏß³Ì³Ø
+		// å¼€ä¸ªçº¿ç¨‹æ± 
 		int nThreads = 4;
 		CountDownLatch countDownLatch = new CountDownLatch(nThreads);
 		ExecutorService executorService = Executors.newFixedThreadPool(nThreads);
 		Double[] results = new Double[nThreads];
-		// ¸³ÖµËÄ·İÁã¼şÁĞ±í
+		// èµ‹å€¼å››ä»½é›¶ä»¶åˆ—è¡¨
 		List<List<Piece>> parallelPieceList = new ArrayList<>();
 		for(int j = 0; j < nThreads; j++){
-			// ¸³ÖµÁã¼şÁĞ±í
+			// èµ‹å€¼é›¶ä»¶åˆ—è¡¨
 			List<Piece> pieceList = new LinkedList<>();
 			for (Piece piece : listapiezas) {
 				try {
@@ -462,24 +475,24 @@ public class Instance
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		// ¿ªÊ¼²¢ĞĞ¼ÆËã
+		// å¼€å§‹å¹¶è¡Œè®¡ç®—
 		for(int i = 0; i < nThreads; i++){
 			int id = i;
 			executorService.submit(()->{
 				System.out.println("current Thread:" + Thread.currentThread().getName() + " begin");
-				// ¼ÇÂ¼Ã¿¸öÏß³ÌÔËĞĞµÃµ½µÄ×î´óÖµ¡£
+				// è®°å½•æ¯ä¸ªçº¿ç¨‹è¿è¡Œå¾—åˆ°çš„æœ€å¤§å€¼ã€‚
 				results[id] = singleThreadTask(indi, graphVisual, parallelPieceList.get(id));
 				countDownLatch.countDown();
 				System.out.println("current Thread:" + Thread.currentThread().getName() + " countdown");
 			});
 		}
-		// µÈ´ıËùÓĞÈÎÎñ½áÊø
+		// ç­‰å¾…æ‰€æœ‰ä»»åŠ¡ç»“æŸ
 		try {
 			countDownLatch.await();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		// ·µ»ØÃ¿¸öÏß³Ì´¦Àí½á¹ûµÄ×î´óÖµ
+		// è¿”å›æ¯ä¸ªçº¿ç¨‹å¤„ç†ç»“æœçš„æœ€å¤§å€¼
 //		return Arrays.stream(results).max((d1, d2)->{
 //			return d1.compareTo(d2);
 //		}).get();
@@ -488,29 +501,29 @@ public class Instance
 	}
 
 	/**
-	 * Ã¿¸öÏß³ÌµÄÈÎÎñ
+	 * æ¯ä¸ªçº¿ç¨‹çš„ä»»åŠ¡
 	 */
 	private double singleThreadTask(int indi, boolean graphVisual, List<Piece> originPieceList) {
-		// ½û¼ÉÁĞ±íºÍãĞÖµ
-		Queue<String> tabuQueue = new LinkedList<>();	//ÓÃ¶ÓÁĞÀ´±£´æ½û¼É±í£¬ÈİÁ¿Îª5
-		double initThreshold = 2; 						//ºÏ²¢ºóÓĞ¸öµÃ·Ö£¬³¬¹ı³õÊ¼¿É½ÓÊÜãĞÖµ¾ÍÄÜºÏ²¢£¬¸Ä³É´«¸øreplacementµÄ³ÉÔ±±äÁ¿ÁË
-		int tabuSize = 5; 								//½û¼ÉÁĞ±í³¤¶È
+		// ç¦å¿Œåˆ—è¡¨å’Œé˜ˆå€¼
+		Queue<String> tabuQueue = new LinkedList<>();	//ç”¨é˜Ÿåˆ—æ¥ä¿å­˜ç¦å¿Œè¡¨ï¼Œå®¹é‡ä¸º5
+		double initThreshold = 2; 						//åˆå¹¶åæœ‰ä¸ªå¾—åˆ†ï¼Œè¶…è¿‡åˆå§‹å¯æ¥å—é˜ˆå€¼å°±èƒ½åˆå¹¶ï¼Œæ”¹æˆä¼ ç»™replacementçš„æˆå‘˜å˜é‡äº†
+		int tabuSize = 5; 								//ç¦å¿Œåˆ—è¡¨é•¿åº¦
 
-		// Çø·Ö°¼Í¹¶à±ßĞÎ£¬ÏÈµ÷ÓÃÕâÒ»²½Ğ§¹û¸ü²îÁË£¬²»ÖªÎªÉ¶
+		// åŒºåˆ†å‡¹å‡¸å¤šè¾¹å½¢ï¼Œå…ˆè°ƒç”¨è¿™ä¸€æ­¥æ•ˆæœæ›´å·®äº†ï¼Œä¸çŸ¥ä¸ºå•¥
 		RePlacement rePlacement = new RePlacement();
 		rePlacement.findConvexAndNonconvex(originPieceList, rePlacement.convexList, rePlacement.nonConvexList);
 
 
-		// ½û¼ÉËÑË÷¿ªÊ¼
-		List<Double> resultList = new ArrayList<>(); 	//ÖĞ¼ä½á¹ûÁĞ±í
-		double bestResult = 0; 							//×î¼Ñ½á¹û
-		rePlacement.threshold = 2; 						//×î´óãĞÖµ
-		rePlacement.smallThreshold = 0.4; 				//×îµÍãĞÖµ£¬½µµ½´Ë¾Í²»»áÔÙ½µÁË
+		// ç¦å¿Œæœç´¢å¼€å§‹
+		List<Double> resultList = new ArrayList<>(); 	//ä¸­é—´ç»“æœåˆ—è¡¨
+		double bestResult = 0; 							//æœ€ä½³ç»“æœ
+		rePlacement.threshold = 2; 						//æœ€å¤§é˜ˆå€¼
+		rePlacement.smallThreshold = 0.4; 				//æœ€ä½é˜ˆå€¼ï¼Œé™åˆ°æ­¤å°±ä¸ä¼šå†é™äº†
 		rePlacement.tabuQueue = tabuQueue;
-		int iteration = 5; 								//ÔËĞĞ´úÊı
+		int iteration = 5; 								//è¿è¡Œä»£æ•°
 		bestResult = tabuSearch(iteration, indi, graphVisual, tabuQueue, initThreshold, tabuSize, originPieceList, resultList, bestResult, rePlacement);
 
-		// ÔÙÅÜÒ»±é²»½áºÏµÄ
+		// å†è·‘ä¸€éä¸ç»“åˆçš„
 		//bestResult = getBestResult(indi, graphVisual, originPieceList, resultList, bestResult);
 
 		System.out.println("current Thread: " + Thread.currentThread().getName() + ".  process:" + resultList + ".  best result:" + bestResult);
@@ -521,23 +534,23 @@ public class Instance
 	private double tabuSearch(int iteration, int indi, boolean graphVisual, Queue<String> tabuQueue, double initThreshold, int tabuSize, List<Piece> originPieceList, List<Double> resultList, double bestResult, RePlacement rePlacement) {
 		List<Piece> pieceListParallel = new LinkedList<>();
 		for (int it = 0; it < iteration; it++) {
-			// 0. Ô­Ê¼Áã¼ş¸³Öµ
+			// 0. åŸå§‹é›¶ä»¶èµ‹å€¼
 			rePlacement.setOriginPieceList(originPieceList);
-			// 1. ÉèÖÃfitnessµÄ½ÓÊÜãĞÖµ
-			rePlacement.threshold -= it * 0.1; //ãĞÖµÖğ½¥¼õĞ¡£¬Ö±µ½×îµÍ¿É½ÓÊÜãĞÖµn£¿
+			// 1. è®¾ç½®fitnessçš„æ¥å—é˜ˆå€¼
+			rePlacement.threshold -= it * 0.1; //é˜ˆå€¼é€æ¸å‡å°ï¼Œç›´åˆ°æœ€ä½å¯æ¥å—é˜ˆå€¼nï¼Ÿ
 			if (rePlacement.threshold < rePlacement.smallThreshold) {
-				// ½µµÍºóÊÇ±£³ÖÔÚµÍãĞÖµ»¹ÊÇÖØÀ´£¿
+				// é™ä½åæ˜¯ä¿æŒåœ¨ä½é˜ˆå€¼è¿˜æ˜¯é‡æ¥ï¼Ÿ
 				//rePlacement.threshold = rePlacement.smallThreshold;
 				rePlacement.threshold = initThreshold;
 			}
-			// 2. ½áºÏ£¬ÕâÀï»¹Òª·µ»Ø½áºÏµÄ½á¹û
-			rePlacement.processUion.clear(); //Çå¿ÕÒ»ÏÂºÏ²¢½á¹û
+			// 2. ç»“åˆï¼Œè¿™é‡Œè¿˜è¦è¿”å›ç»“åˆçš„ç»“æœ
+			rePlacement.processUion.clear(); //æ¸…ç©ºä¸€ä¸‹åˆå¹¶ç»“æœ
 			rePlacement.xObject = xObjeto;
 			rePlacement.yObject = yObjeto;
 			pieceListParallel = rePlacement.combineNonConvex();
 
 
-			// 3.È¡³ö½áºÏµÄ½á¹û£¬°´fitness´Ó´óµ½Ğ¡ÅÅĞò
+			// 3.å–å‡ºç»“åˆçš„ç»“æœï¼ŒæŒ‰fitnessä»å¤§åˆ°å°æ’åº
 			List<Map<String, Double>> processUnion = rePlacement.processUion;
 			Collections.sort(processUnion, new Comparator<Map<String, Double>>() {
 				@Override
@@ -559,86 +572,86 @@ public class Instance
 			});
 
 
-			// 4.¸üĞÂ½û¼É±í£¬ÈıÂÖºó¾Í¸üĞÂÂğ£¬ÒòÎªÈç¹ûÒ»Ö±ÖØ¸´£¬ÄÇqueue¾ÍÒ»Ö±²»¸üĞÂ
+			// 4.æ›´æ–°ç¦å¿Œè¡¨ï¼Œä¸‰è½®åå°±æ›´æ–°å—ï¼Œå› ä¸ºå¦‚æœä¸€ç›´é‡å¤ï¼Œé‚£queueå°±ä¸€ç›´ä¸æ›´æ–°
 			if (it % tabuSize == 0) {
-				tabuQueue.poll(); //µ¯³ö±£´æ×î¾ÃµÄ
+				tabuQueue.poll(); //å¼¹å‡ºä¿å­˜æœ€ä¹…çš„
 			}
-			// Ê×ÏÈÈ·±£ºÏ²¢±í²»ÊÇ¿ÕµÄ£¬todo:Èç¹ûÊÇ¿ÕµÄ¾ÍÖ±½ÓÌ×ÁÏ?
+			// é¦–å…ˆç¡®ä¿åˆå¹¶è¡¨ä¸æ˜¯ç©ºçš„ï¼Œtodo:å¦‚æœæ˜¯ç©ºçš„å°±ç›´æ¥å¥—æ–™?
 			if (!processUnion.isEmpty()) {
-				// »ñµÃfitness×îĞ¡µÄÄÇ¸ö£¬¼ÓÈë½û¼É±í
+				// è·å¾—fitnessæœ€å°çš„é‚£ä¸ªï¼ŒåŠ å…¥ç¦å¿Œè¡¨
 				String fit = (String) processUnion.get(0).keySet().stream().toArray()[0];
-				// Èç¹û½û¼É±íµÄ³¤¶ÈĞ¡ÓÚ3£¬ÇÒ²»°üº¬¼´½«¼ÓÈëµÄÔªËØ£¬²Å¼ÓÈë
-				if (queueContains(tabuQueue, fit)) { //Èç¹û´æÔÚ£¬ÔòËæ»úÑ¡Ò»¸ö¼ÓÈë
-					// Ëæ»úÑ¡Ò»¸öºÏ²¢¹ı³ÌÖĞµÄ½á¹û¼ÓÈë
+				// å¦‚æœç¦å¿Œè¡¨çš„é•¿åº¦å°äº3ï¼Œä¸”ä¸åŒ…å«å³å°†åŠ å…¥çš„å…ƒç´ ï¼Œæ‰åŠ å…¥
+				if (queueContains(tabuQueue, fit)) { //å¦‚æœå­˜åœ¨ï¼Œåˆ™éšæœºé€‰ä¸€ä¸ªåŠ å…¥
+					// éšæœºé€‰ä¸€ä¸ªåˆå¹¶è¿‡ç¨‹ä¸­çš„ç»“æœåŠ å…¥
 					int size = processUnion.size();
 					int randomNum = (int) (Math.random() * size);
 					fit = (String) processUnion.get(randomNum).keySet().stream().toArray()[0];
-					while (tabuQueue.contains(fit)) { //Èç¹û»¹ÖØ¸´ÁË£¬ÔÙÉú³É
+					while (tabuQueue.contains(fit)) { //å¦‚æœè¿˜é‡å¤äº†ï¼Œå†ç”Ÿæˆ
 						randomNum = (int) (Math.random() * size);
 						fit = (String) processUnion.get(randomNum).keySet().stream().toArray()[0];
 					}
 					tabuQueue.offer(fit);
 				} else {
-					tabuQueue.offer(fit); //²»´æÔÚ²Å¼ÓÈë
+					tabuQueue.offer(fit); //ä¸å­˜åœ¨æ‰åŠ å…¥
 				}
 			}
 
 
-			// 5.¿ªÊ¼Ì×ÁÏ
-			// ×¼±¸ºÃÁã¼şºÍµ×°å
+			// 5.å¼€å§‹å¥—æ–™
+			// å‡†å¤‡å¥½é›¶ä»¶å’Œåº•æ¿
 			List<Sheet> listaObjetos = new LinkedList<>();
 			if (listaObjetos.size() > 0)
 				listaObjetos.clear(); //Limpiar el contenedor
 			listaObjetos.add(new Sheet(xObjeto, yObjeto, 0));
 
-			double currentResult; //µ±Ç°½á¹û
+			double currentResult; //å½“å‰ç»“æœ
 			ControlHeuristics control = new ControlHeuristics();
 			do {
 				control.executeHeuristic(pieceListParallel, listaObjetos, 0);
 			} while (pieceListParallel.size() > 0);
 
 
-			// 6.¼ÆËã½á¹û£¬Çå³ıÃ»ÓĞÁã¼şµÄµ×°å
+			// 6.è®¡ç®—ç»“æœï¼Œæ¸…é™¤æ²¡æœ‰é›¶ä»¶çš„åº•æ¿
 			for (int i = 0; i < listaObjetos.size(); i++) {
 				Sheet objk = (Sheet) listaObjetos.get(i);
 				List<Piece> Lista2 = objk.getPzasInside();
 				if (Lista2.size() == 0)
 					listaObjetos.remove(i);
 			}
-			// ¼ÆËã½á¹û
+			// è®¡ç®—ç»“æœ
 			currentResult = control.calcularAptitud(listaObjetos);
 			int ax = (int) (currentResult * 1000.0);
 			currentResult = (double) ax / 1000.0;
 			resultList.add(currentResult);
-			// ¸üĞÂ×î¼Ñ½á¹û
+			// æ›´æ–°æœ€ä½³ç»“æœ
 			if (currentResult > bestResult) {
 				bestResult = currentResult;
 			}
 
 
-			// 7.»¹Ô­½á¹û£¨ºó¼ÓµÄ£©
+			// 7.è¿˜åŸç»“æœï¼ˆååŠ çš„ï¼‰
 			for (int i = 0; i < listaObjetos.size(); i++) {
-				// ¶ÔÃ¿¸öµ×°åÉÏµÄÁã¼ş
+				// å¯¹æ¯ä¸ªåº•æ¿ä¸Šçš„é›¶ä»¶
 				Sheet sheet = listaObjetos.get(i);
 				List<Piece> pieceList = sheet.getPzasInside();
 
 				boolean flag = true;
 				while (flag) {
-					boolean happen = false; //·¢ÉúÁËÉ¾³ı
+					boolean happen = false; //å‘ç”Ÿäº†åˆ é™¤
 					for (int j = 0; j < pieceList.size(); j++) {
 						Piece piece = pieceList.get(j);
 						if (piece.child.size() > 0) {
 							double rotate = piece.getRotada();
-							piece.rotateCori(rotate); //Ğı×ªÔ­×ø±ê£¬ÔÙ¼ÆËãÒÆ¶¯ÁË¶àÉÙ
-							int shifx = piece.coordX[0] - piece.getCoriX()[0]; //x×ø±êµÄÒÆ¶¯³¤¶È
-							int shify = piece.coordY[0] - piece.getCoriY()[0]; //y×ø±êµÄÒÆ¶¯³¤¶È
-							movereStore(piece, rotate, shifx, shify, pieceList); //½«º¢×Ó½Úµã¶¼¼ÓÈëµ±Ç°µ×°åµÄÁã¼şÁĞ±í
-							pieceList.remove(piece); //É¾µôÕâ¸ö¸¸½Úµã
+							piece.rotateCori(rotate); //æ—‹è½¬åŸåæ ‡ï¼Œå†è®¡ç®—ç§»åŠ¨äº†å¤šå°‘
+							int shifx = piece.coordX[0] - piece.getCoriX()[0]; //xåæ ‡çš„ç§»åŠ¨é•¿åº¦
+							int shify = piece.coordY[0] - piece.getCoriY()[0]; //yåæ ‡çš„ç§»åŠ¨é•¿åº¦
+							movereStore(piece, rotate, shifx, shify, pieceList); //å°†å­©å­èŠ‚ç‚¹éƒ½åŠ å…¥å½“å‰åº•æ¿çš„é›¶ä»¶åˆ—è¡¨
+							pieceList.remove(piece); //åˆ æ‰è¿™ä¸ªçˆ¶èŠ‚ç‚¹
 							happen = true;
-							break; //Ö»ÓĞ»¹ÓĞº¢×Ó½ÚµãµÄÁã¼ş¾Í»áÒ»Ö±ÖØ¸´
+							break; //åªæœ‰è¿˜æœ‰å­©å­èŠ‚ç‚¹çš„é›¶ä»¶å°±ä¼šä¸€ç›´é‡å¤
 						}
 					}
-					if (happen) { //ÓĞÉ¾³ı£¬»¹µÃ¼ÌĞøÑ­»·
+					if (happen) { //æœ‰åˆ é™¤ï¼Œè¿˜å¾—ç»§ç»­å¾ªç¯
 						flag = true;
 					} else {
 						flag = false;
@@ -647,7 +660,7 @@ public class Instance
 			}
 
 
-			// 8.¿ÉÊÓ»¯½á¹û
+			// 8.å¯è§†åŒ–ç»“æœ
 			//Get graph of the results:
 			ResultVisual[] nuevo = new ResultVisual[4];
 			if (graphVisual) {
@@ -668,10 +681,10 @@ public class Instance
 		if(listaObjetos.size()>0)
 			listaObjetos.clear(); //Limpiar el contenedor
 		listaObjetos.add(new Sheet(xObjeto, yObjeto, 0));
-		// Èç¹ûÒª³¢ÊÔÒ»´Î½áºÏµÄ
+		// å¦‚æœè¦å°è¯•ä¸€æ¬¡ç»“åˆçš„
 		//rePlacement.setOriginPieceList(originPieceList);
 		//listapiezas = rePlacement.combineNonConvex();
-		// ½«Áã¼ş¸³Öµµ½listapiezasÀïÃæ
+		// å°†é›¶ä»¶èµ‹å€¼åˆ°listapiezasé‡Œé¢
 		for (Piece piece : originPieceList) {
 			listapiezas.add(piece);
 		}
@@ -691,44 +704,45 @@ public class Instance
 				listaObjetos.remove(i);
 		}
 
-		// ¼ÆËã½á¹û
+		// è®¡ç®—ç»“æœ
 		aptitud=control.calcularAptitud(listaObjetos);
 		int ax=(int) (aptitud*1000.0);
 		aptitud=(double) ax/1000.0;
-		resultList.add(aptitud); //Ìí¼Óµ½½á¹ûÁĞ±í
-		// ¸üĞÂ×î¼Ñ½á¹û
+		resultList.add(aptitud); //æ·»åŠ åˆ°ç»“æœåˆ—è¡¨
+		// æ›´æ–°æœ€ä½³ç»“æœ
 		if(aptitud > bestResult){
 			bestResult = aptitud;
 		}
 
-		//Get graph of the results:
-		if (graphVisual){
-		 Vector<Sheet> listita = new Vector<Sheet>();
-		 for(int i=0; i<listaObjetos.size(); i++)
-		 {
+		//ä¸­é—´ç»“æœå¯è§†åŒ–:
+		Vector<Sheet> listita = new Vector<Sheet>();
+		for(int i=0; i<listaObjetos.size(); i++)
+		{
 			listita.add((Sheet)(listaObjetos.get(i)));
-		 }
+		}
+		if (graphVisual){
 		 nuevo[indi] = new ResultVisual(listita);
 		 nuevo[indi].setSize(700, 650);
        	 nuevo[indi].setVisible(true);
        	}
+		visualList.add(listita);
 		return bestResult;
 	}
 
 	/**
-	 * ½«pieceµÄº¢×Ó½áµã¶¼¼ÓÈëpiecelist£¬²¢É¾µôÃ¿¸öº¢×Ó½áµãµÄº¢×Ó½áµã
+	 * å°†pieceçš„å­©å­ç»“ç‚¹éƒ½åŠ å…¥piecelistï¼Œå¹¶åˆ æ‰æ¯ä¸ªå­©å­ç»“ç‚¹çš„å­©å­ç»“ç‚¹
 	 */
 	private void movereStore(Piece piece, double rotate, int shifx, int shify, List<Piece> pieceList) {
 		if(piece.child.size() > 0){
 			movereStore(piece.child.get(0), rotate, shifx, shify, pieceList);
 			movereStore(piece.child.get(1), rotate, shifx, shify, pieceList);
-			//piece.child.clear(); //º¢×Ó½áµã¼ÓÍêºó£¬¾ÍÉ¾µô
+			//piece.child.clear(); //å­©å­ç»“ç‚¹åŠ å®Œåï¼Œå°±åˆ æ‰
 		}
 
 		if(piece.child.size() == 0){
-			// ÏÈĞı×ª
+			// å…ˆæ—‹è½¬
 			piece.rotate(rotate);
-			// x,y×ø±ê·Ö±ğÒÆ¶¯
+			// x,yåæ ‡åˆ†åˆ«ç§»åŠ¨
 			for(int i = 0; i < piece.coordX.length; i++){
 				piece.coordX[i] += shifx;
 				piece.coordY[i] += shify;
@@ -740,19 +754,19 @@ public class Instance
 
 
 	/**
-	 * Ö»¸ø³öÀûÓÃÂÊ²»ÂúµÄµ×°åµÄÖØÅÅÑù½á¹û
+	 * åªç»™å‡ºåˆ©ç”¨ç‡ä¸æ»¡çš„åº•æ¿çš„é‡æ’æ ·ç»“æœ
 	 */
 	private void reExecute(List<Piece> listapiezas, List<Sheet> listaObjetos, int action) {
 		listapiezas.clear();
-		// ±£´æÁã¼şÒÔ¼°ÒÑ¾­×°ÂúµÄµ×°å
+		// ä¿å­˜é›¶ä»¶ä»¥åŠå·²ç»è£…æ»¡çš„åº•æ¿
 		List<Sheet> fullObjectList = new ArrayList<>();
 		for(int i = 0; i < listaObjetos.size(); i++){
-			// ¶¼Ã»ÓĞ×°ÂúµÄÇé¿öÏÂ£¬×î´óµÄÌø¹ı
+			// éƒ½æ²¡æœ‰è£…æ»¡çš„æƒ…å†µä¸‹ï¼Œæœ€å¤§çš„è·³è¿‡
 			if( i == listaObjetos.size()-1 ){
 				fullObjectList.add(listaObjetos.get(i));
 				continue;
 			}
-			// ×°ÂúµÄÌø¹ı
+			// è£…æ»¡çš„è·³è¿‡
 			if(listaObjetos.get(i).getFreeArea() == 0){
 				fullObjectList.add(listaObjetos.get(i));
 				continue;
@@ -762,17 +776,17 @@ public class Instance
 				listapiezas.add(pzasInside.get(j));
 			}
 		}
-		// Çå¿Õµ×°å
+		// æ¸…ç©ºåº•æ¿
 		listaObjetos.clear();
 		listaObjetos.add(new Sheet(1000, 1000, 0));
-		// ÖØĞÂÅÅ°æ
+		// é‡æ–°æ’ç‰ˆ
 		ControlHeuristics control = new ControlHeuristics();
 		do
 		{
 			control.executeHeuristic(listapiezas, listaObjetos, action);
 		}while(listapiezas.size()>0);
 
-		// ½«ÂúµÄµ×°åÖØĞÂ¼ÓÈë
+		// å°†æ»¡çš„åº•æ¿é‡æ–°åŠ å…¥
 		for(int i = 0; i < fullObjectList.size(); i++){
 			listaObjetos.add(fullObjectList.get(i));
 		}
@@ -784,7 +798,7 @@ public class Instance
 		return listaObjetos.size();
 	}
 
-	// ÒÆ¶¯ËùÓĞÁã¼şÖÁ×óÏÂ½Ç
+	// ç§»åŠ¨æ‰€æœ‰é›¶ä»¶è‡³å·¦ä¸‹è§’
 	public void moveAllPieceToBottomLeft(List<Piece> listapiezas) {
 		for(int i = 0; i < listapiezas.size(); i++){
 			Piece piece = listapiezas.get(i);
@@ -797,7 +811,7 @@ public class Instance
 		}
 	}
 
-	// ²é¿´¶ÓÁĞÀïÊÇ·ñº¬ÓĞÔªËØ
+	// æŸ¥çœ‹é˜Ÿåˆ—é‡Œæ˜¯å¦å«æœ‰å…ƒç´ 
 	public boolean queueContains(Queue<String> queue, String str){
 		for (String s : queue) {
 			if(s.equals(str)){
@@ -805,6 +819,51 @@ public class Instance
 			}
 		}
 		return false;
+	}
+
+	public double ejecutaAccion (int action, int indi, boolean graficar){
+		if(listaObjetos.size()>0)
+			listaObjetos.clear();
+		listaObjetos.add(new Sheet(xObjeto, yObjeto, 0));
+		double aptitud; //action?0??FF-BL??3??DJD-MA
+		ControlHeuristics control = new ControlHeuristics();
+		do
+		{
+			control.executeHeuristic(listapiezas, listaObjetos, action);
+		}while(listapiezas.size()>0);
+		/**
+		 * ?replacement
+		 */
+
+
+		// delete the bin that cannot pack any item ?????item?bin
+		for(int i=0; i<listaObjetos.size(); i++)
+		{
+			Sheet objk = (Sheet)listaObjetos.get(i);
+			List<Piece> Lista2 = objk.getPzasInside();
+			if(Lista2.size()==0)
+				listaObjetos.remove(i);
+		}
+
+
+		aptitud=control.calcularAptitud(listaObjetos);
+		int ax=(int) (aptitud*1000.0);
+		aptitud=(double) ax/1000.0;
+		System.out.println("åˆ©ç”¨ç‡:" + aptitud);
+
+		//Get graph of the results:
+		if (graficar){
+			Vector<Sheet> listita = new Vector<Sheet>();
+			for(int i=0; i<listaObjetos.size(); i++)
+			{
+				listita.add((Sheet)(listaObjetos.get(i)));
+			}
+			nuevo[indi] = new ResultVisual(listita);
+			nuevo[indi].setSize(700, 650);
+			nuevo[indi].setVisible(true);
+		}
+
+		return aptitud;
 	}
 	
 	

@@ -1,31 +1,29 @@
 package share;
 
+import java.util.HashSet;
 import java.util.List;
-
-
-// Selection heuristics.  
 
 public class Heuristics
 {
 	static Sheet nextObject;
 	static Piece pza;
-	static int objectsMaximum = 20;	//×î¶àÊ¹ÓÃµÄµ×°åÊıÁ¿
-	static int piecesMaximum = 200;	//Ò»´Î×î¶à¿ÉÒÔ·ÅÖÃµÄÁã¼şÊıÁ¿
-	static boolean getOut = false;  //Ê§°Ü±ê¼Ç
-	private int[][] pieceUnfit  = new int [objectsMaximum][piecesMaximum];  									// ¼ÇÂ¼ÄÄĞ©²»ÊÊºÏ·Å
-	private int[][][] pieceUnfit2  = new int [objectsMaximum][piecesMaximum][piecesMaximum];					// ¼ÇÂ¼ÄÄĞ©Á½¸ö×éºÏµÄ²»ÊÊºÏ
-	private int[][][][] pieceUnfit3  = new int [objectsMaximum][piecesMaximum][piecesMaximum][piecesMaximum];	// ¼ÇÂ¼ÄÄĞ©Èı¸ö×éºÏµÄ²»ÊÊºÏ
+	static int objectsMaximum = 20;	//æœ€å¤šä½¿ç”¨çš„åº•æ¿æ•°é‡
+	static int piecesMaximum = 200;	//ä¸€æ¬¡æœ€å¤šå¯ä»¥æ”¾ç½®çš„é›¶ä»¶æ•°é‡
+	static boolean getOut = false;  //å¤±è´¥æ ‡è®°
+	private int[][] pieceUnfit  = new int [objectsMaximum][piecesMaximum];  									// è®°å½•å“ªäº›ä¸é€‚åˆæ”¾
+	private int[][][] pieceUnfit2  = new int [objectsMaximum][piecesMaximum][piecesMaximum];					// è®°å½•å“ªäº›ä¸¤ä¸ªç»„åˆçš„ä¸é€‚åˆ
+	private int[][][][] pieceUnfit3  = new int [objectsMaximum][piecesMaximum][piecesMaximum][piecesMaximum];	// è®°å½•å“ªäº›ä¸‰ä¸ªç»„åˆçš„ä¸é€‚åˆ
 
 
 	/**
-	 * filler
+	 * filleré€‰æ‹©ç­–ç•¥
 	 */
 	public void Filler(List<Piece> listapiezas, List<Sheet> listaObjetos, int xObjeto, int yObjeto, String H_acomodo)   
 	{
 		boolean acomodopieza = false;
 		listapiezas = OrderPieces(listapiezas, 1);
 
-		for(int i = 0; i<listapiezas.size(); i++)  //½µĞò
+		for(int i = 0; i<listapiezas.size(); i++)  //é™åº
 		{
 			if (acomodopieza)
 			{
@@ -57,7 +55,7 @@ public class Heuristics
 			First_Fit_Decreasing(listapiezas, listaObjetos, xObjeto, yObjeto, H_acomodo); 
 		}
 
-		listapiezas = AcomodoOriginalPiezas(listapiezas);
+		listapiezas = AdjustOriginalPieces(listapiezas);
 	}
 
 
@@ -182,7 +180,6 @@ public class Heuristics
 	} 
 
 
-	// DJD
 	public void Djang_and_Finch(List<Piece> listapiezas, List<Sheet> listaObjetos, int xObjeto, int yObjeto, String H_acomodo, double CapInicial, int type)
 	{ 	
 		int ancho, anchoPza0;
@@ -240,46 +237,47 @@ public class Heuristics
 		}
 	}
 
-	
+
+	// DJD
 	private void Djang_and_Finch_2D(List<Piece> listapiezas, List<Sheet> listaObjetos, int xObjeto, int yObjeto, String H_acomodo, double CapInicial, int type)
 	{ 	
       
-		HeuristicsPlacement acomodo = new HeuristicsPlacement();
-		boolean acomodopieza = false;
-		int increment = ((Sheet)listaObjetos.get(0)).gettotalsize() / 20;	// Ã¿´ÎÔö¼ÓµÄwaste£¬1/20
+		HeuristicsPlacement placement = new HeuristicsPlacement();
+		boolean canPlace = false;
+		int increment = ((Sheet)listaObjetos.get(0)).gettotalsize() / 20;	// æ¯æ¬¡å¢åŠ çš„wasteï¼Œ1/20
 		int w = 0; 															// waste
-		listapiezas = OrderPieces(listapiezas, 1);					// °´Ãæ»ı½µĞò
-		boolean terminar = false;											// ¾ö¶¨Ê²Ã´Ê±ºò¿ªÒ»¸öĞÂµÄbin
+		listapiezas = OrderPieces(listapiezas, 1);					// æŒ‰é¢ç§¯é™åº
+		boolean terminar = false;											// å†³å®šä»€ä¹ˆæ—¶å€™å¼€ä¸€ä¸ªæ–°çš„bin
 		getOut = false;
 
 		/**
 		 * line 3-4, take the newst bin and fill the bin until 1/3
-		 * ÄÃµ½×îĞÂµÄÒ»¸öbin£¬ÌîÂú1/3
+		 * æ‹¿åˆ°æœ€æ–°çš„ä¸€ä¸ªbinï¼Œå¡«æ»¡1/3
 		 */
-		//for (int j = 0; j < listaObjetos.size(); j++)   // Hyper-heuristics
-		// ÏÈÌîÂú1/3
+//		for (int j = 0; j < listaObjetos.size(); j++)   // Hyper-heuristics
+		// å…ˆå¡«æ»¡1/3
 		for (int j = listaObjetos.size()-1; j < listaObjetos.size(); j++)
 		{
 			nextObject = (Sheet)listaObjetos.get(j);
 			// capinicial = 1/3
 			if(nextObject.getUsedArea() < nextObject.gettotalsize()*CapInicial)
 			{
-				for (int i=0; i<listapiezas.size(); i++)   //½µĞò
+				for (int i=0; i<listapiezas.size(); i++)   //é™åº
 				{
 					pza = (Piece)listapiezas.get(i);
 					if (pza.getTotalSize() <= nextObject.getFreeArea() )
 					{
 						pza.desRotar();
-						acomodopieza = acomodo.HAcomodo(nextObject, pza, H_acomodo);
-						if (!acomodopieza)
+						canPlace = placement.HAcomodo(nextObject, pza, H_acomodo);
+						if (!canPlace)
 						{
-							pieceUnfit[j][i] = 1;   // ¼ÇÂ¼²»ÊÊºÏ·ÅµÄ
+							pieceUnfit[j][i] = 1;   // è®°å½•ä¸é€‚åˆæ”¾çš„
 						}
-						if (acomodopieza)
+						if (canPlace)
 						{
 							nextObject.addPieza(pza);
 							listapiezas.remove(pza);
-							listapiezas = AcomodoOriginalPiezas(listapiezas);  // adjust to the original order
+							listapiezas = AdjustOriginalPieces(listapiezas);  // adjust to the original order
 							return;
 						}
 					}
@@ -289,10 +287,10 @@ public class Heuristics
 
 
 		/**
-		 * ³¢ÊÔ×éºÏ·ÅÖÃ
+		 * å°è¯•ç»„åˆæ”¾ç½®
 		 */
-		//for (int j = 0; j < listaObjetos.size(); j++) // hyper-heuristics.
-		for (int j = listaObjetos.size()-1; j < listaObjetos.size(); j++) 
+//		for (int j = 0; j < listaObjetos.size(); j++) // hyper-heuristics.
+		for (int j = listaObjetos.size()-1; j < listaObjetos.size(); j++)
 		{
 			nextObject = (Sheet)listaObjetos.get(j);
 			w = 0;
@@ -305,30 +303,30 @@ public class Heuristics
 
 			do
 			{
-				// ³¢ÊÔÒ»¸ö
+				// å°è¯•ä¸€ä¸ª
 				unapieza(listapiezas, nextObject, H_acomodo, w); 
 				if(getOut)
 				{
-					listapiezas = AcomodoOriginalPiezas(listapiezas);
+					listapiezas = AdjustOriginalPieces(listapiezas);
 					return;
 				}
-				// ³¢ÊÔÁ½¸ö
+				// å°è¯•ä¸¤ä¸ª
 				if(listapiezas.size()>1)
 				{
 					dospiezas(listapiezas, nextObject, H_acomodo, w); 
 					if(getOut)
 					{
-						listapiezas = AcomodoOriginalPiezas(listapiezas);
+						listapiezas = AdjustOriginalPieces(listapiezas);
 						return;
 					}
 				}
-				// ³¢ÊÔÈı¸ö
+				// å°è¯•ä¸‰ä¸ª
 				if(listapiezas.size()>2)
 				{
 					trespiezas(listapiezas, nextObject, H_acomodo, w);
 					if(getOut)
 					{
-						listapiezas = AcomodoOriginalPiezas(listapiezas);
+						listapiezas = AdjustOriginalPieces(listapiezas);
 						return;
 					}
 				}
@@ -336,27 +334,27 @@ public class Heuristics
 				// end
 				if(w > nextObject.getFreeArea() )
 					{terminar = true;}
-				w+= increment;  //µ±w´óÓÚ1Ê±£¬¿ÉÒÔ³¢ÊÔ½«Æä³¬³ö×ÔÓÉÇøÓò¡£¼ÙÉè×ÔÓÉÇøÓòÎª10999£¬ÔöÁ¿Îª1000£¬½¨ÒéÔÚ³¢ÊÔw=10000ºó£¬ÔÙ³¢ÊÔw=11000£¬ÒÔ±ã¼ì²éÊÇ·ñÓĞÃæ»ıĞ¡ÓÚ999µÄÁã¼ş»òÁã¼ş×éºÏ¿ÉÒÔÊÊºÏ¡£
+				w+= increment;  //å½“wå¤§äº1æ—¶ï¼Œå¯ä»¥å°è¯•å°†å…¶è¶…å‡ºè‡ªç”±åŒºåŸŸã€‚å‡è®¾è‡ªç”±åŒºåŸŸä¸º10999ï¼Œå¢é‡ä¸º1000ï¼Œå»ºè®®åœ¨å°è¯•w=10000åï¼Œå†å°è¯•w=11000ï¼Œä»¥ä¾¿æ£€æŸ¥æ˜¯å¦æœ‰é¢ç§¯å°äº999çš„é›¶ä»¶æˆ–é›¶ä»¶ç»„åˆå¯ä»¥é€‚åˆã€‚
 
 			}while(!terminar);
 		}
 
 
-		nextObject=abreNuevoObjeto(listaObjetos, xObjeto, yObjeto); //¿ªĞÂµÄµ×°å
-		pza = SearchGreatest(listapiezas); 							//ÕÒµ½×î´óµÄÒ»¿éÁã¼ş·Åµ½ÏÂÒ»¸öµ×°åÖĞ
-		pza.desRotar(); 											//È¡ÏûĞı×ª
-		acomodopieza = acomodo.HAcomodo(nextObject, pza, H_acomodo);
-		if (acomodopieza)
+		nextObject=abreNuevoObjeto(listaObjetos, xObjeto, yObjeto); //å¼€æ–°çš„åº•æ¿
+		pza = SearchGreatest(listapiezas); 							//æ‰¾åˆ°æœ€å¤§çš„ä¸€å—é›¶ä»¶æ”¾åˆ°ä¸‹ä¸€ä¸ªåº•æ¿ä¸­
+		pza.desRotar(); 											//å–æ¶ˆæ—‹è½¬
+		canPlace = placement.HAcomodo(nextObject, pza, H_acomodo);
+		if (canPlace)
 		{
 			nextObject.addPieza(pza);
 			listapiezas.remove(pza);
 		}
-		// ÖØĞÂÅÅĞò
-		listapiezas = AcomodoOriginalPiezas(listapiezas);
+		// é‡æ–°æ’åº
+		listapiezas = AdjustOriginalPieces(listapiezas);
 	}
 
 	/**
-	 * Ëæ»úÈÅ¶¯µÄDJD
+	 * éšæœºæ‰°åŠ¨çš„DJD
 	 */
 	private void Djang_and_Finch_2D_Random(List<Piece> listapiezas, List<Sheet> listaObjetos, int xObjeto, int yObjeto, String H_acomodo, double CapInicial, int type)
 	{
@@ -366,7 +364,7 @@ public class Heuristics
 		int increment = ((Sheet)listaObjetos.get(0)).gettotalsize() / 20;
 		int w = 0; //allowed waste
 		listapiezas = OrderPieces(listapiezas, 1);  //descending order
-		//½«×î´óµÄ·Åµ½×îºó£¬±ÈÈçTS011C8£¬Èç¹ûÎÒÄÜÕÒµ½ÄÇ¸ö×îÓÒÏÂ½ÇµÄÏÈ·Å£¬µÃµ½ºÃ½á¹ûµÄ¿ÉÄÜĞÔ¾ÍºÜ´ó£¬Ò²¾ÍÊÇËµ£¬Õâ¸öËã·¨ºÜÒÀÀµ³õÊ¼Áã¼şµÄ·ÅÖÃ
+		//å°†æœ€å¤§çš„æ”¾åˆ°æœ€åï¼Œæ¯”å¦‚TS011C8ï¼Œå¦‚æœæˆ‘èƒ½æ‰¾åˆ°é‚£ä¸ªæœ€å³ä¸‹è§’çš„å…ˆæ”¾ï¼Œå¾—åˆ°å¥½ç»“æœçš„å¯èƒ½æ€§å°±å¾ˆå¤§ï¼Œä¹Ÿå°±æ˜¯è¯´ï¼Œè¿™ä¸ªç®—æ³•å¾ˆä¾èµ–åˆå§‹é›¶ä»¶çš„æ”¾ç½®
 		Piece remove = listapiezas.remove(0);
 		listapiezas.add(remove);
 		boolean terminar = false;  // decides when to open a new bin.
@@ -374,11 +372,11 @@ public class Heuristics
 
 		/**
 		 * line 3-4, take the newst bin and fill the bin until 1/3
-		 * ÄÃµ½×îĞÂµÄÒ»¸öbin£¬ÌîÂú1/3
+		 * æ‹¿åˆ°æœ€æ–°çš„ä¸€ä¸ªbinï¼Œå¡«æ»¡1/3
 		 */
 
 		//for (int j = 0; j < listaObjetos.size(); j++)   // for Hyper-heuristics
-		// ÕâÀï¿ªÊ¼×¢ÊÍ
+		// è¿™é‡Œå¼€å§‹æ³¨é‡Š
 		for (int j = listaObjetos.size()-1; j < listaObjetos.size(); j++)
 		{
 			nextObject = (Sheet)listaObjetos.get(j);
@@ -400,7 +398,7 @@ public class Heuristics
 						{
 							nextObject.addPieza(pza);
 							listapiezas.remove(pza);
-							listapiezas = AcomodoOriginalPiezas(listapiezas);  // adjust to the original order
+							listapiezas = AdjustOriginalPieces(listapiezas);  // adjust to the original order
 							return;
 						}
 					}
@@ -427,7 +425,7 @@ public class Heuristics
 				unapieza(listapiezas, nextObject, H_acomodo, w);
 				if(getOut)
 				{
-					listapiezas = AcomodoOriginalPiezas(listapiezas);
+					listapiezas = AdjustOriginalPieces(listapiezas);
 					return;
 				}
 				// try two piece
@@ -436,7 +434,7 @@ public class Heuristics
 					dospiezas(listapiezas, nextObject, H_acomodo, w);
 					if(getOut)
 					{
-						listapiezas = AcomodoOriginalPiezas(listapiezas);
+						listapiezas = AdjustOriginalPieces(listapiezas);
 						return;
 					}
 				}
@@ -446,7 +444,7 @@ public class Heuristics
 					trespiezas(listapiezas, nextObject, H_acomodo, w);
 					if(getOut)
 					{
-						listapiezas = AcomodoOriginalPiezas(listapiezas);
+						listapiezas = AdjustOriginalPieces(listapiezas);
 						return;
 					}
 				}
@@ -460,17 +458,17 @@ public class Heuristics
 		}
 
 
-		nextObject=abreNuevoObjeto(listaObjetos, xObjeto, yObjeto); //¿ªĞÂµÄµ×°å
-		pza = SearchGreatest(listapiezas); 							//ÕÒµ½×î´óµÄÒ»¿éÁã¼ş·Åµ½ÏÂÒ»¸öµ×°åÖĞ
-		pza.desRotar(); 											//È¡ÏûĞı×ª
+		nextObject=abreNuevoObjeto(listaObjetos, xObjeto, yObjeto); //å¼€æ–°çš„åº•æ¿
+		pza = SearchGreatest(listapiezas); 							//æ‰¾åˆ°æœ€å¤§çš„ä¸€å—é›¶ä»¶æ”¾åˆ°ä¸‹ä¸€ä¸ªåº•æ¿ä¸­
+		pza.desRotar(); 											//å–æ¶ˆæ—‹è½¬
 		acomodopieza = acomodo.HAcomodo(nextObject, pza, H_acomodo);
 		if (acomodopieza)
 		{
 			nextObject.addPieza(pza);
 			listapiezas.remove(pza);
 		}
-		// ÖØÅÅĞò
-		listapiezas = AcomodoOriginalPiezas(listapiezas);
+		// é‡æ’åº
+		listapiezas = AdjustOriginalPieces(listapiezas);
 	}
 
 
@@ -502,7 +500,7 @@ public class Heuristics
 						{
 							nextObject.addPieza(pza);
 							listapiezas.remove(pza);
-							listapiezas = AcomodoOriginalPiezas(listapiezas);
+							listapiezas = AdjustOriginalPieces(listapiezas);
 							return;
 						}
 					}
@@ -521,7 +519,7 @@ public class Heuristics
 
 			if( verificador(listapiezas, nextObject.getFreeArea()) )
 			{
-				continue;  //Èç¹ûÔÚfreeÇøÓòÖĞÒÑ¾­Ã»ÓĞ¿Õ¼ä¿ÉÒÔ·ÅÖÃÈÎºÎÁã¼ş£¬ÔòĞèÒªÒÆ¶¯µ½ÏÂÒ»¸öbin¡£
+				continue;  //å¦‚æœåœ¨freeåŒºåŸŸä¸­å·²ç»æ²¡æœ‰ç©ºé—´å¯ä»¥æ”¾ç½®ä»»ä½•é›¶ä»¶ï¼Œåˆ™éœ€è¦ç§»åŠ¨åˆ°ä¸‹ä¸€ä¸ªbinã€‚
 			}
 
 			do
@@ -529,7 +527,7 @@ public class Heuristics
 				unapieza_1D(listapiezas, nextObject, H_acomodo, w);  
 				if(getOut)
 				{
-					listapiezas = AcomodoOriginalPiezas(listapiezas);
+					listapiezas = AdjustOriginalPieces(listapiezas);
 					return;
 				}
 				if(listapiezas.size()>1)
@@ -537,7 +535,7 @@ public class Heuristics
 					dospiezas_1D(listapiezas, nextObject, H_acomodo, w);  
 					if(getOut)
 					{
-						listapiezas = AcomodoOriginalPiezas(listapiezas);
+						listapiezas = AdjustOriginalPieces(listapiezas);
 						return;
 					}
 				}
@@ -546,7 +544,7 @@ public class Heuristics
 					trespiezas_1D(listapiezas, nextObject, H_acomodo, w);
 					if(getOut)
 					{
-						listapiezas = AcomodoOriginalPiezas(listapiezas);
+						listapiezas = AdjustOriginalPieces(listapiezas);
 						return;
 					}
 				}
@@ -569,11 +567,11 @@ public class Heuristics
 			listapiezas.remove(pza);
 		}
 		// For hyper-heuristics (combining heuristics), it is important to leave the pieces in their original order.
-		listapiezas = AcomodoOriginalPiezas(listapiezas);
+		listapiezas = AdjustOriginalPieces(listapiezas);
 	}
 
 
-	//Receives an ordered list by piece size (decreasing order)
+	//åˆ¤æ–­æ˜¯å¦åˆé€‚
 	private static boolean verificador(List<Piece> listapiezas1, int freearea)
 	{
 		Piece pza1;
@@ -606,7 +604,7 @@ public class Heuristics
 			pza1 = (Piece)listapiezas1.get(i);
 			if( (arealibre-pza1.getTotalSize()) > w )
 			{
-				break;  // Èç¹ûÔÚ×ÔÓÉÇøÓòÖĞÒÑ¾­Ã»ÓĞ¿Õ¼ä¿ÉÒÔ·ÅÖÃÈÎºÎÁã¼ş£¬ÔòĞèÒªÒÆ¶¯µ½ÏÂÒ»¸ö¶ÔÏó¡£
+				break;  // å¦‚æœåœ¨è‡ªç”±åŒºåŸŸä¸­å·²ç»æ²¡æœ‰ç©ºé—´å¯ä»¥æ”¾ç½®ä»»ä½•é›¶ä»¶ï¼Œåˆ™éœ€è¦ç§»åŠ¨åˆ°ä¸‹ä¸€ä¸ªå¯¹è±¡ã€‚
 			}
 			if( pza1.getTotalSize() > arealibre 
 					|| (pieceUnfit[numObj][i] == 1 ) )  
@@ -674,8 +672,8 @@ public class Heuristics
 		HeuristicsPlacement acomodo = new HeuristicsPlacement();
 		Piece pza1, pza2;
 		boolean acomodo1 = false, acomodo2 = false;
-		int area0, area1;  //Ãæ»ı×î´óµÄÁ½¸öÁã¼ş
-		int areaU;		   //gÃæ»ı×îĞ¡µÄÁã¼ş£¬minimum piece
+		int area0, area1;  //é¢ç§¯æœ€å¤§çš„ä¸¤ä¸ªé›¶ä»¶
+		int areaU;		   //gé¢ç§¯æœ€å°çš„é›¶ä»¶ï¼Œminimum piece
 		int arealibre;
 		int numObj;  
 		pza1 = (Piece)listapiezas1.get(listapiezas1.size()-1);  
@@ -688,7 +686,7 @@ public class Heuristics
 		pza2 = (Piece)listapiezas1.get(1);
 		area0 = pza1.getTotalSize();
 		area1 = pza2.getTotalSize();
-		// ×î´óµÄÁ½¸öÏÈÊÔÏÂ, the first biggest two
+		// æœ€å¤§çš„ä¸¤ä¸ªå…ˆè¯•ä¸‹, the first biggest two
 		if( (arealibre-area0-area1) > w1)
 		{
 			return;
@@ -699,12 +697,12 @@ public class Heuristics
 			acomodo1 = false;
 			acomodo2 = false;
 			pza1 = (Piece)listapiezas1.get(i);
-			// µÚ¶şĞĞ, line 2
+			// ç¬¬äºŒè¡Œ, line 2
 			if(arealibre - pza1.getTotalSize()-area0 > w1)
 			{
 				break;
 			}
-			// µÚËÄĞĞ£¬line 4
+			// ç¬¬å››è¡Œï¼Œline 4
 			if(pza1.getTotalSize()+areaU > arealibre  
 					 || (pieceUnfit[numObj][i] == 1 ) )  
 			{
@@ -719,7 +717,7 @@ public class Heuristics
 
 
 
-				// µÚ10ĞĞ£¬ Line 10
+				// ç¬¬10è¡Œï¼Œ Line 10
 				for(int j=0; j<listapiezas1.size(); j++)
 				{
 					pza2 = (Piece)listapiezas1.get(j);
@@ -751,11 +749,11 @@ public class Heuristics
 						pieceUnfit2[numObj][i][j] = 1;  //pieces i & j cannot be placed in the object.
 					}
 				}
-				// ÕâÀïÏàµ±ÓÚpiece2Ã»ÄÜ·Å½øÈ¥£¬Ò²µÃ°Ñpiece1É¾µô£¬¸Ğ¾õÒ²¿ÉÒÔ·Åµ½ÉÏÃæ
+				// è¿™é‡Œç›¸å½“äºpiece2æ²¡èƒ½æ”¾è¿›å»ï¼Œä¹Ÿå¾—æŠŠpiece1åˆ æ‰ï¼Œæ„Ÿè§‰ä¹Ÿå¯ä»¥æ”¾åˆ°ä¸Šé¢
 				nextObject1.removePreliminarPieza(pza1);
 
 			} else{
-				// µÚ8ĞĞ£¬line 8
+				// ç¬¬8è¡Œï¼Œline 8
 				pieceUnfit[numObj][i] = 1;
 			}
 		}
@@ -872,7 +870,7 @@ public class Heuristics
 		area0 = pza1.getTotalSize();
 		area1 = pza2.getTotalSize();
 		area2 = pza3.getTotalSize();
-		// line2: ×î´óµÄÈı¸öÒ²²»ĞĞ, the biggest three cannot
+		// line2: æœ€å¤§çš„ä¸‰ä¸ªä¹Ÿä¸è¡Œ, the biggest three cannot
 		if( (arealibre-area0-area1-area2) > w1)
 		{
 			return;
@@ -889,7 +887,7 @@ public class Heuristics
 			{
 				break;
 			}
-			// line 4: Ê£Óà¿Õ¼ä·Å²»ÏÂ
+			// line 4: å‰©ä½™ç©ºé—´æ”¾ä¸ä¸‹
 			if(pza1.getTotalSize() +areaU1 + areaU2> arealibre 
 					 || pieceUnfit[numObj][i] == 1 )   
 			{
@@ -1250,7 +1248,7 @@ public class Heuristics
 		{
 			ordenObjetos[i] = i;
 		}
-		//ordena objetos por ¨¢rea libre
+		//ordena objetos por Ã¡rea libre
 		for(int i =0; i<listaObjetos.size(); i++)
 		{
 			for(int j = 0; j<listaObjetos.size()-1; j++)
@@ -1312,7 +1310,7 @@ public class Heuristics
 		{
 			ordenObjetos[i] = i;
 		}
-		//ordena objetos por ¨¢rea libre
+		//ordena objetos por Ã¡rea libre
 		for(int i =0; i<listaObjetos.size(); i++)
 		{
 			for(int j = 0; j<listaObjetos.size()-1; j++)
@@ -1370,7 +1368,7 @@ public class Heuristics
 	}
 
 
-	// 1: ½µĞò,  ÆäËû: ÉıĞò.
+	// 1: é™åº,  å…¶ä»–: å‡åº.
 	private static List<Piece> OrderPieces(List<Piece> ListaPiezas, int Orderd)
 	{
 		Piece temporal;
@@ -1403,7 +1401,10 @@ public class Heuristics
 	}
 
 
-	private static List<Piece> AcomodoOriginalPiezas(List<Piece> ListaPiezas)
+	/**
+	 * å¯¹é›¶ä»¶é‡æ–°æ’åº
+	 */
+	private static List<Piece> AdjustOriginalPieces(List<Piece> ListaPiezas)
 	{
 		Piece temporal;
 		List<Piece> ListaOrdenOriginal = ListaPiezas;

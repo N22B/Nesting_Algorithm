@@ -30,10 +30,6 @@ import static share.RePlacement.toNestCoordinates;
  *
  */
 
-/**
- * @author yisa
- */
-
 public class GeometryUtil {
     private static double TOL = Math.pow(10,-2);
 
@@ -46,7 +42,7 @@ public class GeometryUtil {
         return Math.abs(a-b)<tolerance;
     }
 
-    // 判断是否凹多边形
+    // 判断是否凸多边形
     public static boolean isConvex(NestPath path){
         int n = path.size();
         boolean flag = false;
@@ -87,7 +83,6 @@ public class GeometryUtil {
         int vertices2 = pieza2.getvertices();
         boolean value;
 
-        // Primero se descartan el caso de piezas que no tienen posibilidad de cruzarse.
         // 1-4????????
         if ( (pieza1.getXmax() <= pieza2.getXmin())
                 ||(pieza2.getXmax() <= pieza1.getXmin())
@@ -97,7 +92,6 @@ public class GeometryUtil {
             return false;
         }
 
-        //los primeros n-1 lados de pieza1 vs todos los lados de pieza2.
         // ???n-1??????
         for (int i = 0; i < vertices1-1; i++)
         {  for (int j = 0; j < vertices2-1; j++)
@@ -111,8 +105,7 @@ public class GeometryUtil {
                 return true;
             }
         }
-            //vs. último lado de pieza2
-            // all side of piece1 with the last side of piece2
+
             value = interseccionSS(pieza1.coordX[i], pieza1.coordY[i],
                     pieza1.coordX[i+1], pieza1.coordY[i+1],
                     pieza2.coordX[vertices2-1], pieza2.coordY[vertices2-1],
@@ -124,8 +117,6 @@ public class GeometryUtil {
         }
 
 
-        //último lado de pieza1 vs todos los lados de pieza2 (excepto el último).
-        // the last side of piece1 intersect with first n-1 sides of piece2
         for (int j = 0; j < vertices2-1; j++)
         {
             value = interseccionSS(pieza1.coordX[vertices1-1], pieza1.coordY[vertices1-1],
@@ -139,8 +130,6 @@ public class GeometryUtil {
         }
 
 
-        //último lado de pieza1 vs. último lado de pieza2
-        // last side of piece1 with last side of piece2
         value = interseccionSS(pieza1.coordX[vertices1-1], pieza1.coordY[vertices1-1],
                 pieza1.coordX[0], pieza1.coordY[0],
                 pieza2.coordX[vertices2-1], pieza2.coordY[vertices2-1],
@@ -602,7 +591,6 @@ public class GeometryUtil {
         }
 
 
-        // un sólo segmento vertical (obvio, no son paralelos y no pueden
         if (X1 == X2 || X3 == X4)    // ser adyacentes aunque se crucen).
         {
             return 0;
@@ -783,7 +771,6 @@ public class GeometryUtil {
     public static double lenofLineSegment(double x1, double y1, double x2, double y2){
         return Math.sqrt(Math.pow((x1-x2),2) + Math.pow((y1-y2),2));
     }
-
 
 
     /**

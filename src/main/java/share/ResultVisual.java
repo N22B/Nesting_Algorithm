@@ -50,7 +50,8 @@ public class ResultVisual extends JFrame{
 		g.setFont( new Font( "Helvetica",Font.BOLD,18 ) );
 		g.setColor(Color.black);
 		g.drawString(name.concat(String.valueOf(objetoselec)), 55,45);
-		g.setColor(Color.white);
+		//g.setColor(Color.white);
+		g.setColor(new Color(169, 209, 142)); //底板颜色
 		// ????????
 		double xfactor = obj.getXmax()/500.0;
 		double yfactor = obj.getYmax()/500.0;
@@ -77,11 +78,12 @@ public class ResultVisual extends JFrame{
 				coordenadasX[j]=50+ (int)(( pza.coordX[j] )/xfactor);
 				coordenadasY[j]=50+ (int)(( (obj.getYmax()-pza.coordY[j]) )/yfactor);
         	}
-        	g.setColor(Color.pink);
+        	//g.setColor(Color.pink);
+			g.setColor(new Color(191, 191, 191));
         	g.fillPolygon(coordenadasX, coordenadasY, pza.getvertices());
 			g.setColor(Color.black);
         	g.drawPolygon(coordenadasX, coordenadasY, pza.getvertices());
-        	g.setFont( new Font("Helvetica",Font.PLAIN,9) );
+        	g.setFont( new Font("Helvetica",Font.PLAIN,15) );
         	
         	letrero = String.valueOf(pza.getnumber());
       		letrero = letrero.concat(" - ");

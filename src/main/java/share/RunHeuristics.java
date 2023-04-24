@@ -92,7 +92,8 @@ public class RunHeuristics {
 
 						// 开始计算，起始时间
 						long start = System.currentTimeMillis();
-						aptitudes[indice][i]=p.execute(i, indice, graphVisual); //串行版本
+//						aptitudes[indice][i]=p.execute(i, indice, graphVisual); //串行版本（改进djd）
+						aptitudes[indice][i]=p.ejecutaAccion(i, indice, graphVisual); //串行版本（原始djd）
 						//aptitudes[indice][i]=p.executeParallel(i, indice, graphVisual); //并行版本
 						numObjects[indice][i]=p.numeroObjetos();
 						long stop = System.currentTimeMillis();

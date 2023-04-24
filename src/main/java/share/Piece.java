@@ -6,14 +6,14 @@ import java.util.List;
 import static java.lang.Math.*;
 
 
-// Áã¼ş
+// é›¶ä»¶
 public class Piece implements Comparable<Piece>, Cloneable
 {
-	public int[] coordX;	//Áã¼şµÄX×ø±ê
+	public int[] coordX;	//é›¶ä»¶çš„Xåæ ‡
 	public int[] coordY;
-	private int[] coriX;	//Áã¼şµÄÔ­Ê¼X×ø±ê
+	private int[] coriX;	//é›¶ä»¶çš„åŸå§‹Xåæ ‡
 	private int[] coriY;
-	private int vertices;	//Áã¼şµÄ¶¥µã¸öÊı
+	private int vertices;	//é›¶ä»¶çš„é¡¶ç‚¹ä¸ªæ•°
 	private int area;
 	private int xmin;
 	private int xmax;
@@ -266,12 +266,12 @@ public class Piece implements Comparable<Piece>, Cloneable
 		}	
 
 		rotada += angulo;
-		// todo:ÕâÀïµ½µ×ÓÃ²»ÓÃÒÆ¶¯£¿
+		// todo:è¿™é‡Œåˆ°åº•ç”¨ä¸ç”¨ç§»åŠ¨ï¼Ÿ
 //		moveToXY(tempXmin, tempYmin, 2);
 	}
 
 	public void rotateCori(double angulo){
-		// ×¢ÒâÕâÀïºÍÉÏÃærotate²»Ò»Ñù£¬²»ÄÜĞı×ªangulo + rotada
+		// æ³¨æ„è¿™é‡Œå’Œä¸Šé¢rotateä¸ä¸€æ ·ï¼Œä¸èƒ½æ—‹è½¬angulo + rotada
 		double radianes = toRadians(angulo);  //total angle: the rotated until now + the new rotation angle
 		double coseno = cos(radianes);
 		double seno = sin(radianes);
@@ -289,7 +289,7 @@ public class Piece implements Comparable<Piece>, Cloneable
 		}
 
 		rotada += angulo;
-		// todo:ÕâÀïµ½µ×ÓÃ²»ÓÃÒÆ¶¯£¿
+		// todo:è¿™é‡Œåˆ°åº•ç”¨ä¸ç”¨ç§»åŠ¨ï¼Ÿ
 //		moveToXY(tempXmin, tempYmin, 2);
 	}
 
@@ -342,7 +342,7 @@ public class Piece implements Comparable<Piece>, Cloneable
 	}
 	
 
-	// ÕÒµ½ÊÇµÚ¼¸¸öµã
+	// æ‰¾åˆ°æ˜¯ç¬¬å‡ ä¸ªç‚¹
    public int numVertice(int[] punto)
    {
 		for (int i=0; i < vertices; i++)

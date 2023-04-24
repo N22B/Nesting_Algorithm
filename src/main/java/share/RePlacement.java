@@ -1340,7 +1340,7 @@ public class RePlacement {
         fitness += edgeOverlapRatio;
         // 3.计算新零件的包络矩形占比，要不要平方，或者是凸包占包络矩形的比例的平方，这里使用包络矩形可以解释为底板为矩形
         // TODO: 还是占比的提升度？
-        fitness += 2*Math.pow(GeometryUtil.polygonArea(newConvex)/GeometryUtil.getPolygonBounds(newConvex).getArea(), 2);
+        fitness += Math.pow(GeometryUtil.polygonArea(newConvex)/GeometryUtil.getPolygonBounds(newConvex).getArea(), 2);
         return fitness;
     }
 

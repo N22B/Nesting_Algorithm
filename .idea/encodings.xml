@@ -1,27 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="Encoding">
-    <file url="file://$PROJECT_DIR$/src/main/java/share/ArrayOperations.java" charset="ISO-8859-1" />
-    <file url="file://$PROJECT_DIR$/src/main/java/share/ControlHeuristics.java" charset="ISO-8859-1" />
-    <file url="file://$PROJECT_DIR$/src/main/java/share/Heuristics.java" charset="GBK" />
-    <file url="file://$PROJECT_DIR$/src/main/java/share/HeuristicsPlacement.java" charset="GBK" />
-    <file url="file://$PROJECT_DIR$/src/main/java/share/Instance.java" charset="GBK" />
-    <file url="file://$PROJECT_DIR$/src/main/java/share/Piece.java" charset="GBK" />
-    <file url="file://$PROJECT_DIR$/src/main/java/share/PieceVirtual.java" charset="ISO-8859-1" />
+    <file url="file://$PROJECT_DIR$/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java/share/ArrayOperations.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java/share/ControlHeuristics.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java/share/Heuristics.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java/share/HeuristicsPlacement.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java/share/Instance.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java/share/Piece.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java/share/PieceVirtual.java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/java/share/RWfiles.java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/java/share/ResultVisual.java" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/src/main/java/share/RunHeuristics.java" charset="GBK" />
-    <file url="file://$PROJECT_DIR$/src/main/java/share/Sheet.java" charset="GBK" />
-    <file url="file://$PROJECT_DIR$/src/main/java/src/share/ArrayOperations.java" charset="ISO-8859-1" />
-    <file url="file://$PROJECT_DIR$/src/main/java/src/share/ControlHeuristics.java" charset="ISO-8859-1" />
-    <file url="file://$PROJECT_DIR$/src/main/java/src/share/Heuristics.java" charset="GBK" />
-    <file url="file://$PROJECT_DIR$/src/main/java/src/share/HeuristicsPlacement.java" charset="GBK" />
-    <file url="file://$PROJECT_DIR$/src/main/java/src/share/Instance.java" charset="ISO-8859-1" />
-    <file url="file://$PROJECT_DIR$/src/main/java/src/share/Piece.java" charset="ISO-8859-1" />
-    <file url="file://$PROJECT_DIR$/src/main/java/src/share/PieceVirtual.java" charset="ISO-8859-1" />
-    <file url="file://$PROJECT_DIR$/src/main/java/src/share/RWfiles.java" charset="ISO-8859-1" />
-    <file url="file://$PROJECT_DIR$/src/main/java/src/share/ResultVisual.java" charset="ISO-8859-1" />
-    <file url="file://$PROJECT_DIR$/src/main/java/src/share/RunHeuristics.java" charset="GBK" />
-    <file url="file://$PROJECT_DIR$/src/main/java/src/share/Sheet.java" charset="ISO-8859-1" />
+    <file url="file://$PROJECT_DIR$/src/main/java/share/RunHeuristics.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java/share/Sheet.java" charset="UTF-8" />
   </component>
 </project>
